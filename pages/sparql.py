@@ -1,10 +1,11 @@
 import dash
-from dash import html, callback, Input, Output
+from dash import html, callback, Input, Output, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from helpers import sparql_utils
 from dash_ag_grid import AgGrid
 import monaco_editor
+import yaml
 
 editor_options = {
     "autoIndent": "full",
@@ -27,12 +28,29 @@ editor_options = {
     "automaticLayout": True,
 }
 
+examples = yaml.safe_load(open("./examples/sparql.example.yaml"))["sample_queries"]
+
 dash.register_page(__name__)
 
 layout = html.Div(
     [
         dbc.Row(
             [
+                dbc.Row(
+                    dcc.Dropdown(
+                        id="sample-query",
+                        options=[
+                            {"label": example["name"], "value": example["query"]}
+                            for example in examples
+                        ],
+                        value="",
+                        placeholder="Select Example Query",
+                    ),
+                    style={
+                        "margin-top": "15px",
+                        "margin-bottom": "30px",
+                    },
+                ),
                 dbc.Row(
                     dbc.Col(
                         monaco_editor.MonacoEditor(
@@ -80,6 +98,15 @@ layout = html.Div(
         html.Br(),
     ]
 )
+
+
+@callback(
+    Output("sparql-query", "value"),
+    Input("sample-query", "value"),
+    prevent_initial_call=True,
+)
+def update_editor_from_dropdown(query):
+    return query
 
 
 @callback(

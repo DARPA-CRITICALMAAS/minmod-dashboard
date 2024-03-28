@@ -5,7 +5,6 @@ CERT_FILE = "./ssl/minmod_isi_edu_cert.cer"
 KEY_FILE = "./ssl/minmod_isi_edu_key.key"
 
 
-
 app = dash.Dash(external_stylesheets=[dbc.themes.LITERA], use_pages=True)
 
 app.layout = dash.html.Div(
@@ -13,15 +12,31 @@ app.layout = dash.html.Div(
         dbc.Row(
             dbc.Nav(
                 [
-                    dbc.NavItem(dbc.NavLink("Dashboard", active=True, href="/")),
-                    dbc.NavItem(dbc.NavLink("GT Model", active=True, href="gtmodel")),
                     dbc.NavItem(
                         dbc.NavLink(
-                            "Mineral Site Data", active=True, href="mineralsite"
+                            "Dashboard", external_link=True, active=True, href="/"
                         )
                     ),
                     dbc.NavItem(
-                        dbc.NavLink("SPARQL Sandbox", active=True, href="sparql")
+                        dbc.NavLink(
+                            "GT Model", external_link=True, active=True, href="gtmodel"
+                        )
+                    ),
+                    dbc.NavItem(
+                        dbc.NavLink(
+                            "Mineral Site Data",
+                            external_link=True,
+                            active=True,
+                            href="mineralsite",
+                        )
+                    ),
+                    dbc.NavItem(
+                        dbc.NavLink(
+                            "SPARQL Sandbox",
+                            external_link=True,
+                            active=True,
+                            href="sparql",
+                        )
                     ),
                 ],
                 style={"margin-left": "10px"},
@@ -34,4 +49,4 @@ app.layout = dash.html.Div(
 # Run app and display result inline in the notebook
 if __name__ == "__main__":
     context = (CERT_FILE, KEY_FILE)
-    app.run_server(host="0.0.0.0",ssl_context = context ,port=8050)
+    app.run_server(host="0.0.0.0", ssl_context=context, port=8050)

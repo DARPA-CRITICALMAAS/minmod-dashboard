@@ -1,0 +1,63 @@
+sample_queries:
+  - name: number of instances (subjects with a specific type, excluding literals and blank nodes)
+    description: its a sample query
+    query: |
+      SELECT (COUNT(DISTINCT ?instance) AS ?count)
+            WHERE {
+                ?instance a ?type .
+                FILTER(!isBlank(?instance))
+                FILTER(!isLiteral(?instance))
+            }
+  - name: number of classes
+    description: number of classes
+    query: |
+      SELECT (COUNT(DISTINCT ?class) AS ?count)
+            WHERE {
+                ?class a rdfs:Class .
+                FILTER(!isBlank(?class))  # exclude blank nodes
+            }
+  - name: Nickel MineralSite instances
+    description: Nickel MineralSite instances
+    query: |
+      SELECT ?ms ?msr ?mss ?loc_wkt
+            WHERE {
+                ?ms a :MineralSite .
+                ?ms :record_id ?msr .
+                ?ms :source_id ?mss .
+                ?ms :location_info [ :location ?loc_wkt ] .
+                
+                ?ms :mineral_inventory ?mi .
+                ?mi :commodity [ :name "Nickel"@en ] .
+            }
+  - name: Grade-Tonnage models
+    description: Grade-Tonnage models
+    query: |
+      SELECT ?ms ?ms_name ?mi ?mi_cat ?ore_val ?ore_unit_lbl ?grade_val ?grade_unit_lbl ?cutoff_grade ?dt_conf ?dt_s ?dtnorm ?dtnorm_label ?country ?loc_wkt
+            WHERE {
+                ?ms :mineral_inventory ?mi .
+                OPTIONAL { ?ms rdfs:label|:name ?ms_name . }
+
+                ?ms :deposit_type_candidate ?dpc .
+                  
+                ?dpc :confidence ?dt_conf .
+                ?dpc :source ?dt_s .
+                ?dpc :normalized_uri ?dtnorm .
+                ?dtnorm rdfs:label ?dtnorm_label .
+                
+                OPTIONAL {
+                      ?ms :location_info [ :country ?country ] .
+                      ?ms :location_info [ :location ?loc_wkt ] .
+                      FILTER(datatype(?loc_wkt) = geo:wktLiteral)
+                }
+                
+                ?mi :category ?mi_cat .
+                ?mi :commodity [ :name "Nickel"@en ] .
+                
+                OPTIONAL { ?mi :ore [ :ore_value ?ore_val;
+                                      :ore_unit  ?ore_unit] .
+                                      ?ore_unit rdfs:label ?ore_unit_lbl . }
+                OPTIONAL { ?mi :grade [ :grade_value ?grade_val;
+                                      :grade_unit  ?grade_unit] .
+                                      ?grade_unit rdfs:label ?grade_unit_lbl . }
+                OPTIONAL { ?mi :cutoff_grade [ :grade_value ?cutoff_grade ] . }
+            }
