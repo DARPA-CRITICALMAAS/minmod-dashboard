@@ -20,5 +20,16 @@ def get_mineral_inventories():
     }
 
 
+def get_mineral_site_count():
+    query = """
+        SELECT (COUNT(?ms) as ?count)
+        WHERE {
+            ?ms a :MineralSite .
+        }
+    """
+    df = sparql_utils.run_sparql_query(query)
+    return df["count.value"].to_list()[0]
+
+
 if __name__ == "__main__":
     print(get_mineral_inventories())

@@ -28,7 +28,10 @@ layout = html.Div(
                                 width=3,
                             ),
                             dbc.Col(
-                                stats_card("Number of Mineral Sites", 1500),
+                                stats_card(
+                                    "Number of Mineral Sites",
+                                    kpis.get_mineral_site_count(),
+                                ),
                                 width=3,
                             ),
                             dbc.Col(
