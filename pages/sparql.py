@@ -130,6 +130,10 @@ def update_output(n_clicks, query):
                 }
                 for col in df.columns
             ]
+            column_defs.insert(
+                0,
+                {"headerName": "Row ID", "valueGetter": {"function": "params.node.id"}},
+            )
 
             return html.Div(
                 [
