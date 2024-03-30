@@ -3,11 +3,12 @@ import dash_bootstrap_components as dbc
 
 
 def stats_card(header, content):
+
     return dbc.Card(
         html.Div(
             [
                 html.H3([header]),
-                html.H4([content]),
+                html.H4(["{:,}".format(content)]),
             ],
             className=f"border-sucess border-start border-5",
         ),

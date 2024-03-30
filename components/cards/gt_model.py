@@ -4,13 +4,8 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from dash import dcc
 
-# will be replaced with SPARQL
-# pivot_df = pd.read_csv("flat_mineral_site_data.v4.csv")
-
 
 def get_gt_model(gt):
-    dtnorm_labels = gt.df["deposit_name.value"]
-
     # Define color for each unique category in 'dtnorm_labels'
     unique_labels = gt.df["deposit_name.value"].unique()
     colors = np.linspace(0, 1, len(unique_labels))

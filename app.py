@@ -1,5 +1,6 @@
 import dash_bootstrap_components as dbc
 import dash
+import sys
 
 CERT_FILE = "./ssl/minmod_isi_edu_cert.cer"
 KEY_FILE = "./ssl/minmod_isi_edu_key.key"
@@ -48,5 +49,9 @@ app.layout = dash.html.Div(
 
 # Run app and display result inline in the notebook
 if __name__ == "__main__":
-    context = (CERT_FILE, KEY_FILE)
-    app.run_server(host="0.0.0.0", ssl_context=context, port=8050)
+    print(sys.argv)
+    if sys.argv[1] == "dev":
+        app.run_server(host="0.0.0.0", port=8050)
+    if sys.argv[1] == "prod":
+        context = (CERT_FILE, KEY_FILE)
+        app.run_server(host="0.0.0.0", ssl_context=context, port=8050)
