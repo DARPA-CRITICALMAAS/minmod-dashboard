@@ -20,7 +20,10 @@ app.layout = dash.html.Div(
                     ),
                     dbc.NavItem(
                         dbc.NavLink(
-                            "GT Model", external_link=True, active=True, href="gtmodel"
+                            "Grade-Tonnage Model",
+                            external_link=True,
+                            active=True,
+                            href="gtmodel",
                         )
                     ),
                     dbc.NavItem(

@@ -30,7 +30,7 @@ def get_gt_model(gt):
 
     # Logarithmic scale and layout adjustments
     gt_model.update_layout(
-        xaxis=dict(type="log", title="Tonnage, in metric tons"),
+        xaxis=dict(type="log", title="Tonnage, in million tonnes"),
         yaxis=dict(type="log", title="Grade, in percent"),
         title=f"Grade-Tonnage Model of Mineral Deposits ({gt.commodity})",
         hovermode="closest",

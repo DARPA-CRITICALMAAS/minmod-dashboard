@@ -13,7 +13,7 @@ from models import GradeTonnage
 # pivot_df = pd.read_csv("flat_mineral_site_data.v4.csv")
 gt = GradeTonnage(commodity="Nickel", query_path="./models/gt.sql")
 gt.init(get_sparql_data=sparql_utils.run_minmod_query)
-commodities = ["Zinc (Zn)", "Nickel (Ni)", "Lead (Pb)"]
+commodities = ["Zinc (Zn)", "Nickel (Ni)"]
 
 dash.register_page(__name__)
 

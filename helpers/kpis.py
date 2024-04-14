@@ -1,4 +1,5 @@
 from helpers import sparql_utils
+import time
 
 
 def get_mineral_inventories():
@@ -14,10 +15,23 @@ def get_mineral_inventories():
             GROUP BY ?commodity
     """
     df = sparql_utils.run_sparql_query(query)
+    print(df)
     return {
         "labels": df["commodity.value"].to_list(),
         "values": df["count.value"].to_list(),
     }
+
+
+def get_triples_count():
+    query = """
+        SELECT (COUNT(?p) as ?count)
+            WHERE {
+                ?s ?p ?o .
+            }
+    """
+    df = sparql_utils.run_sparql_query(query)
+    print("hello")
+    return int(df["count.value"].to_list()[0]) + int(str(time.time())[-1])
 
 
 def get_mineral_site_count():
@@ -28,7 +42,7 @@ def get_mineral_site_count():
         }
     """
     df = sparql_utils.run_sparql_query(query)
-    return df["count.value"].to_list()[0]
+    return int(df["count.value"].to_list()[0])
 
 
 if __name__ == "__main__":
