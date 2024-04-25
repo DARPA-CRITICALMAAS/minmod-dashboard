@@ -193,7 +193,7 @@ def render():
                         ),
                     ],
                 ),
-                style={"height": "150vh"},
+                style={"height": "200vh"},
             ),
             dcc.Interval(
                 id="interval-component",
