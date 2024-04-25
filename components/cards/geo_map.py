@@ -8,8 +8,8 @@ import dash_bootstrap_components as dbc
 from dash import dcc
 
 
-# a function to safely load WKT strings to geometry objects
 def safe_wkt_load(wkt_str):
+    """a function to safely load WKT strings to geometry objects"""
     try:
         return loads(wkt_str)
     except Exception as e:
@@ -18,7 +18,7 @@ def safe_wkt_load(wkt_str):
 
 
 def get_geo_model(gm, theme):
-
+    """a function to get a scatter mapbox plot"""
     # Cleaning wkt points
     gm.df["loc_wkt.value"] = gm.df["loc_wkt.value"].apply(
         lambda x: x.replace(",", " ") if x.startswith("POINT") else x
@@ -78,6 +78,7 @@ def get_geo_model(gm, theme):
 
 
 def geo_model_card(geo_min, theme):
+    """a function to get return scatter mapbox plot in a dbc.Card"""
     return dbc.Card(
         dbc.CardBody(
             [

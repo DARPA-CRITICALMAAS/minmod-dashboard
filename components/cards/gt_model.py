@@ -6,12 +6,12 @@ from dash import dcc
 
 
 def get_gt_model(gt):
+    """a function to generate grade-tonnade plot"""
     # Define color for each unique category in 'dtnorm_labels'
     unique_labels = gt.df["deposit_name"].unique()
     colors = np.linspace(0, 1, len(unique_labels))
     color_map = {label: color for label, color in zip(unique_labels, colors)}
 
-    # Create Plotly Figure
     gt_model = go.Figure()
 
     for d_type in unique_labels:
@@ -51,6 +51,7 @@ def get_gt_model(gt):
 
 
 def gt_model_card(gt):
+    """a function to generate grade-tonnade plot in a dbc.Card"""
     return dbc.Card(
         dbc.CardBody(
             [

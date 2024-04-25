@@ -2,6 +2,8 @@ from string import Template
 
 
 class GradeTonnage:
+    """A class for holding the grade tonnage model plot"""
+
     def __init__(self, commodity, query_path):
         self.commodity = commodity
         self.query_path = query_path
@@ -9,6 +11,7 @@ class GradeTonnage:
         self.country = []
 
     def init(self, get_sparql_data):
+        """Initialize and load data from query path using the function reference"""
         query = open(self.query_path).read()
         query = Template(query).substitute(commodity=self.commodity)
         self.df = get_sparql_data(query)
@@ -17,9 +20,11 @@ class GradeTonnage:
         self.country = self.df["country"].to_list()
 
     def update_commodity(self, selected_commodity):
+        """sets new commodity"""
         self.commodity = selected_commodity
 
     def clean_df(self, df):
+        """A cleaner method to clean the raw data obtained from the SPARQL endpoint"""
         df.columns = list(map(lambda x: x.split(".value")[0], df.columns))
 
         text_to_clean = [

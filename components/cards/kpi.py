@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 
 
 def stats_card(header, content):
-
+    """a component function to generate a statistics kpi card"""
     return dbc.Card(
         html.Div(
             [

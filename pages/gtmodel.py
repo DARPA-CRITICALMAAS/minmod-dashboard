@@ -8,7 +8,7 @@ from components import stats_card, gt_model_card
 from helpers import sparql_utils
 from models import GradeTonnage
 
-gt = GradeTonnage(commodity="nickel", query_path="./models/gt.sql")
+gt = GradeTonnage(commodity="nickel", query_path="./models/sql/gt.sql")
 gt.init(get_sparql_data=sparql_utils.run_minmod_query)
 
 dash.register_page(__name__)
@@ -67,6 +67,7 @@ layout = html.Div(
     [Input("commodity", "value")],
 )
 def update_output(selected_commodity):
+    """A callback to render grade tonnage model based on the commodity selected"""
     if selected_commodity == gt.commodity:
         return gt_model_card(gt)
     selected_commodity = selected_commodity.split()[0]
@@ -87,6 +88,7 @@ def update_output(selected_commodity):
     prevent_initial_call=True,
 )
 def open_url(clickData):
+    """A callback to open the clicked url on a new tab"""
     if clickData:
         filtered_df = gt.df[gt.df["ms_name"] == clickData["points"][0]["text"]]
         return filtered_df["ms"]

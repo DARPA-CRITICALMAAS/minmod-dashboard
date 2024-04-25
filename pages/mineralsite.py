@@ -110,6 +110,7 @@ def update_dashboard(
     current_deposit_options,
     current_country_options,
 ):
+    """A callback to update the table data, and dropdown values"""
     ctx = dash.callback_context
 
     if not ctx.triggered:
@@ -121,7 +122,7 @@ def update_dashboard(
         deposit_options = []
         country_options = []
         # Initial grid update with new commodity selection
-        ms = MineralSite(commodity=selected_commodity, query_path="./models/ms.sql")
+        ms = MineralSite(commodity=selected_commodity, query_path="./models/sql/ms.sql")
         try:
             ms.init(get_sparql_data=sparql_utils.run_minmod_query)
             df = ms.df
@@ -147,7 +148,7 @@ def update_dashboard(
 
     elif trigger_id in ["deposit_type", "country"]:
         # Refilter based on both deposit type and country
-        ms = MineralSite(commodity=selected_commodity, query_path="./models/ms.sql")
+        ms = MineralSite(commodity=selected_commodity, query_path="./models/sql/ms.sql")
         try:
             ms.init(get_sparql_data=sparql_utils.run_minmod_query)
             df = ms.df
@@ -225,6 +226,7 @@ def update_grid(df):
     Input("ms-csv-button", "n_clicks"),
 )
 def export_data_as_csv(n_clicks):
+    """A callback to handle the download button"""
     if n_clicks:
         return True
     return False

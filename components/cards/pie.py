@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 
 
 def get_pie(labels, values):
+    """a component to generate pie chart"""
     pie_figure = go.Figure(
         data=[
             go.Pie(
@@ -22,8 +23,8 @@ def get_pie(labels, values):
     return pie_figure
 
 
-# Iris bar figure
 def pie_card(labels, values):
+    """a component to generate pie chart in a dbc.Card"""
     return dbc.Card(
         dbc.CardBody(
             [

@@ -3,6 +3,8 @@ import time
 
 
 def get_mineral_inventories():
+    """a helper function to fetch mineral inventories from SPARQL endpoint"""
+
     query = """
         SELECT ?commodity (COUNT(?o_inv) AS ?count)
             WHERE {
@@ -22,6 +24,8 @@ def get_mineral_inventories():
 
 
 def get_triples_count():
+    """a helper function to fetch triples count from SPARQL endpoint"""
+
     query = """
         SELECT (COUNT(?p) as ?count)
             WHERE {
@@ -33,6 +37,7 @@ def get_triples_count():
 
 
 def get_mineral_site_count():
+    """a helper function to fetch mineral site count from SPARQL endpoint"""
     query = """
         SELECT (COUNT(?ms) as ?count)
         WHERE {
@@ -44,6 +49,8 @@ def get_mineral_site_count():
 
 
 def get_commodities():
+    """a helper function to fetch commodities from SPARQL endpoint"""
+
     query = """
         SELECT DISTINCT ?commodity 
             WHERE {

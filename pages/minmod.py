@@ -15,7 +15,7 @@ from dash.exceptions import PreventUpdate
 dash.register_page(__name__, path="/")
 
 mineral_inventories = kpis.get_mineral_inventories()
-gm = GeoMineral(commodity="nickel", query_path="./models/min.sql")
+gm = GeoMineral(commodity="nickel", query_path="./models/sql/min.sql")
 gm.init(get_sparql_data=sparql_utils.run_minmod_query)
 
 
@@ -191,6 +191,7 @@ layout = render()
     [Input("interval-component", "n_intervals")],
 )
 def update_all_cards(_):
+    """A callback to handle the KPI card updates"""
     return ["{:,}".format(kpis.get_triples_count())]
 
 
@@ -199,6 +200,7 @@ def update_all_cards(_):
     [Input("interval-component", "n_intervals")],
 )
 def update_all_cards(_):
+    """A callback to handle all the KPI card updates"""
     return ["{:,}".format(1098)]
 
 
@@ -207,6 +209,7 @@ def update_all_cards(_):
     [Input("interval-component", "n_intervals")],
 )
 def update_all_cards(_):
+    """A callback to handle the KPI card updates"""
     return ["{:,}".format(kpis.get_mineral_site_count())]
 
 
@@ -215,6 +218,7 @@ def update_all_cards(_):
     [Input("interval-component", "n_intervals")],
 )
 def update_all_cards(_):
+    """A callback to handle the PI chart updates"""
     mineral_inventories = kpis.get_mineral_inventories()
     return [
         html.Div(pie_card(mineral_inventories["labels"], mineral_inventories["values"]))
@@ -227,6 +231,7 @@ def update_all_cards(_):
     prevent_initial_call=True,
 )
 def open_url(clickData):
+    """A callback to handle geo map plot based on the user click"""
     if clickData:
         clicked_dict = clickData["points"][0]
         filtered_df = gm.gdf[
@@ -246,6 +251,7 @@ def open_url(clickData):
     ],
 )
 def update_ui(n_clicks_theme, selected_commodity, current_icon, _, n_clicks_previous):
+    """A callback to handle map theme and render map based on the commodity selected"""
     # Initial state when no button has been clicked yet
     if n_clicks_theme is None:
         n_clicks_theme = 0
