@@ -23,29 +23,31 @@ def get_mineral_inventories():
     }
 
 
-def get_triples_count():
-    """a helper function to fetch triples count from SPARQL endpoint"""
-
-    query = """
-        SELECT (COUNT(?p) as ?count)
-            WHERE {
-                ?s ?p ?o .
-            }
-    """
-    df = sparql_utils.run_sparql_query(query)
-    return int(df["count.value"].to_list()[0]) + int(str(time.time())[-1])
-
-
 def get_mineral_site_count():
     """a helper function to fetch mineral site count from SPARQL endpoint"""
     query = """
-        SELECT (COUNT(?ms) as ?count)
-        WHERE {
-            ?ms a :MineralSite .
-        }
+        SELECT (COUNT(DISTINCT ?ms) AS ?site_count)
+            WHERE {
+                ?ms a :MineralSite .
+                ?ms :mineral_inventory ?mi .
+                ?mi :commodity/:name ?comm .
+                ?mi :ore ?ore .
+            }
     """
     df = sparql_utils.run_sparql_query(query)
-    return int(df["count.value"].to_list()[0])
+    return int(df["site_count.value"].to_list()[0])
+
+
+def get_documents_count():
+    """a helper function to fetch the documents count from SPARQL endpoit"""
+    query = """
+        SELECT (COUNT(DISTINCT ?doc) AS ?doc_count)
+            WHERE {
+                ?mi :reference/:document ?doc .
+            }
+    """
+    df = sparql_utils.run_sparql_query(query)
+    return int(df["doc_count.value"].to_list()[0])
 
 
 def get_commodities():

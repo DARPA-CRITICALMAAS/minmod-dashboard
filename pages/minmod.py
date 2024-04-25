@@ -38,27 +38,6 @@ def render():
                                                                 [
                                                                     html.H3(
                                                                         [
-                                                                            "Number of Triples"
-                                                                        ]
-                                                                    ),
-                                                                    dbc.Spinner(
-                                                                        html.H4(
-                                                                            ["empty"],
-                                                                            id="triples-count-card",
-                                                                        ),
-                                                                    ),
-                                                                ],
-                                                                className=f"border-sucess border-start border-5",
-                                                            ),
-                                                            className="text-center text-nowrap my-2 p-2",
-                                                        )
-                                                    ),
-                                                    dbc.Row(
-                                                        dbc.Card(
-                                                            html.Div(
-                                                                [
-                                                                    html.H3(
-                                                                        [
                                                                             "Number of Documents"
                                                                         ]
                                                                     ),
@@ -139,13 +118,16 @@ def render():
                                                 ),
                                                 dbc.Col(
                                                     dbc.Button(
-                                                        html.I(className="fas fa-sun"),
+                                                        html.I(
+                                                            " Theme",
+                                                            className="fas fa-sun",
+                                                        ),
                                                         id="theme-toggle-button",
                                                         color="default",
                                                         className="mr-1",
                                                         style={"border": "1px"},
                                                     ),
-                                                    width=1,
+                                                    width=3,
                                                 ),
                                             ],
                                             className="g-0",
@@ -187,21 +169,12 @@ layout = render()
 
 
 @callback(
-    [Output("triples-count-card", "children")],
-    [Input("interval-component", "n_intervals")],
-)
-def update_all_cards(_):
-    """A callback to handle the KPI card updates"""
-    return ["{:,}".format(kpis.get_triples_count())]
-
-
-@callback(
     [Output("documents-count-card", "children")],
     [Input("interval-component", "n_intervals")],
 )
 def update_all_cards(_):
     """A callback to handle all the KPI card updates"""
-    return ["{:,}".format(1098)]
+    return ["{:,}".format(kpis.get_documents_count())]
 
 
 @callback(
@@ -266,7 +239,7 @@ def update_ui(n_clicks_theme, selected_commodity, current_icon, _, n_clicks_prev
         is_dark = n_clicks_theme % 2 == 1
         new_theme = "dark" if is_dark else "light"
         new_class = "fas fa-moon" if is_dark else "fas fa-sun"
-        return [html.I(className=new_class), geo_model_card(gm, new_theme)]
+        return [html.I(" Theme", className=new_class), geo_model_card(gm, new_theme)]
     elif trigger_id == "commodity-main":
         # Maintain the theme based on the last button click count
         is_dark = n_clicks_previous % 2 == 1
