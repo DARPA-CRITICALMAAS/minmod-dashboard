@@ -38,27 +38,6 @@ def render():
                                                                 [
                                                                     html.H3(
                                                                         [
-                                                                            "Number of Documents"
-                                                                        ]
-                                                                    ),
-                                                                    dbc.Spinner(
-                                                                        html.H4(
-                                                                            ["empty"],
-                                                                            id="documents-count-card",
-                                                                        ),
-                                                                    ),
-                                                                ],
-                                                                className=f"border-sucess border-start border-5",
-                                                            ),
-                                                            className="text-center text-nowrap my-2 p-2",
-                                                        )
-                                                    ),
-                                                    dbc.Row(
-                                                        dbc.Card(
-                                                            html.Div(
-                                                                [
-                                                                    html.H3(
-                                                                        [
                                                                             "Number of Mineral Sites"
                                                                         ]
                                                                     ),
@@ -82,7 +61,73 @@ def render():
                                                                         "margin-top": "50px"
                                                                     }
                                                                 ),
+                                                                id="pie--card--min",
+                                                            ),
+                                                        )
+                                                    ),
+                                                    dbc.Row(
+                                                        dbc.Card(
+                                                            html.Div(
+                                                                [
+                                                                    html.H3(
+                                                                        [
+                                                                            "Number of Inventories"
+                                                                        ]
+                                                                    ),
+                                                                    dbc.Spinner(
+                                                                        html.H4(
+                                                                            ["empty"],
+                                                                            id="inventory-count-card",
+                                                                        ),
+                                                                    ),
+                                                                ],
+                                                                className=f"border-sucess border-start border-5",
+                                                            ),
+                                                            className="text-center text-nowrap my-2 p-2",
+                                                        )
+                                                    ),
+                                                    dbc.Row(
+                                                        dbc.Spinner(
+                                                            html.Div(
+                                                                html.Div(
+                                                                    style={
+                                                                        "margin-top": "50px"
+                                                                    }
+                                                                ),
                                                                 id="pie--card",
+                                                            ),
+                                                        )
+                                                    ),
+                                                    dbc.Row(
+                                                        dbc.Card(
+                                                            html.Div(
+                                                                [
+                                                                    html.H3(
+                                                                        [
+                                                                            "Number of Documents"
+                                                                        ]
+                                                                    ),
+                                                                    dbc.Spinner(
+                                                                        html.H4(
+                                                                            ["empty"],
+                                                                            id="documents-count-card",
+                                                                        ),
+                                                                    ),
+                                                                ],
+                                                                className=f"border-sucess border-start border-5",
+                                                            ),
+                                                            className="text-center text-nowrap my-2 p-2",
+                                                        )
+                                                    ),
+                                                    dbc.Row(
+                                                        dbc.Spinner(
+                                                            html.Div(
+                                                                html.Div(
+                                                                    style={
+                                                                        "margin-top": "50px"
+                                                                    }
+                                                                ),
+                                                                id="pie--card--docs",
                                                             ),
                                                         )
                                                     ),
@@ -119,7 +164,7 @@ def render():
                                                 dbc.Col(
                                                     dbc.Button(
                                                         html.I(
-                                                            " Theme",
+                                                            " Toggle Map View",
                                                             className="fas fa-sun",
                                                         ),
                                                         id="theme-toggle-button",
@@ -148,7 +193,7 @@ def render():
                         ),
                     ],
                 ),
-                style={"height": "100vh"},
+                style={"height": "150vh"},
             ),
             dcc.Interval(
                 id="interval-component",
@@ -178,12 +223,57 @@ def update_all_cards(_):
 
 
 @callback(
+    [Output("inventory-count-card", "children")],
+    [Input("interval-component", "n_intervals")],
+)
+def update_all_cards(_):
+    """A callback to handle the KPI card updates"""
+    return ["{:,}".format(kpis.get_inventory_count())]
+
+
+@callback(
     [Output("mineral-sites-count-card", "children")],
     [Input("interval-component", "n_intervals")],
 )
 def update_all_cards(_):
     """A callback to handle the KPI card updates"""
     return ["{:,}".format(kpis.get_mineral_site_count())]
+
+
+@callback(
+    [Output("pie--card--min", "children")],
+    [Input("interval-component", "n_intervals")],
+)
+def update_all_cards(_):
+    """A callback to handle the PI chart updates"""
+    ms_per_commodity = kpis.get_mineral_site_count_per_commodity()
+    return [
+        html.Div(
+            pie_card(
+                ms_per_commodity["labels"],
+                ms_per_commodity["values"],
+                "Mineral Site Distribution By Commodity",
+            ),
+        )
+    ]
+
+
+@callback(
+    [Output("pie--card--docs", "children")],
+    [Input("interval-component", "n_intervals")],
+)
+def update_all_cards(_):
+    """A callback to handle the PI chart updates"""
+    docs_per_commodity = kpis.get_docs_per_commodity()
+    return [
+        html.Div(
+            pie_card(
+                docs_per_commodity["labels"],
+                docs_per_commodity["values"],
+                "Document Distribution By Commodity",
+            )
+        )
+    ]
 
 
 @callback(
@@ -194,7 +284,13 @@ def update_all_cards(_):
     """A callback to handle the PI chart updates"""
     mineral_inventories = kpis.get_mineral_inventories()
     return [
-        html.Div(pie_card(mineral_inventories["labels"], mineral_inventories["values"]))
+        html.Div(
+            pie_card(
+                mineral_inventories["labels"],
+                mineral_inventories["values"],
+                "Inventory Distribution By Commodity",
+            )
+        )
     ]
 
 
@@ -239,7 +335,10 @@ def update_ui(n_clicks_theme, selected_commodity, current_icon, _, n_clicks_prev
         is_dark = n_clicks_theme % 2 == 1
         new_theme = "dark" if is_dark else "light"
         new_class = "fas fa-moon" if is_dark else "fas fa-sun"
-        return [html.I(" Theme", className=new_class), geo_model_card(gm, new_theme)]
+        return [
+            html.I(" Toggle Map View", className=new_class),
+            geo_model_card(gm, new_theme),
+        ]
     elif trigger_id == "commodity-main":
         # Maintain the theme based on the last button click count
         is_dark = n_clicks_previous % 2 == 1

@@ -6,20 +6,18 @@ def get_mineral_inventories():
     """a helper function to fetch mineral inventories from SPARQL endpoint"""
 
     query = """
-        SELECT ?commodity (COUNT(?o_inv) AS ?count)
+        SELECT DISTINCT ?comm (COUNT(DISTINCT ?mi) AS ?inv_count)
             WHERE {
-                ?s :mineral_inventory ?o_inv .
-                ?o_inv :category ?cat .
-                ?o_inv :commodity [ :name ?commodity ] .
-                ?o_inv :ore [ :ore_value ?ore ] .
-                ?o_inv :grade [ :grade_value ?grade ] .
+                ?mi a :MineralInventory .
+                ?mi :commodity/:name ?comm .
+                ?mi :ore ?ore .
             }
-            GROUP BY ?commodity
+            GROUP BY ?comm
     """
     df = sparql_utils.run_sparql_query(query)
     return {
-        "labels": df["commodity.value"].to_list(),
-        "values": df["count.value"].to_list(),
+        "labels": df["comm.value"].to_list(),
+        "values": df["inv_count.value"].to_list(),
     }
 
 
@@ -38,6 +36,42 @@ def get_mineral_site_count():
     return int(df["site_count.value"].to_list()[0])
 
 
+def get_mineral_site_count_per_commodity():
+    """a helper function to fetch mineral site count from SPARQL endpoint"""
+    query = """
+        SELECT ?comm (COUNT(DISTINCT ?ms) AS ?site_count)
+            WHERE {
+                ?ms a :MineralSite .
+                ?ms :mineral_inventory ?mi .
+                ?mi :commodity/:name ?comm .
+                ?mi :ore ?ore .
+            }
+            GROUP BY ?comm
+    """
+    df = sparql_utils.run_sparql_query(query)
+    return {
+        "labels": df["comm.value"].to_list(),
+        "values": df["site_count.value"].to_list(),
+    }
+
+
+def get_docs_per_commodity():
+    """a helper function to fetch mineral site count from SPARQL endpoint"""
+    query = """
+        SELECT ?comm (COUNT(DISTINCT ?doc) AS ?doc_count)
+            WHERE {
+                ?mi :reference/:document ?doc .
+                ?mi :commodity/:name ?comm .
+            }
+            GROUP BY ?comm
+    """
+    df = sparql_utils.run_sparql_query(query)
+    return {
+        "labels": df["comm.value"].to_list(),
+        "values": df["doc_count.value"].to_list(),
+    }
+
+
 def get_documents_count():
     """a helper function to fetch the documents count from SPARQL endpoit"""
     query = """
@@ -48,6 +82,20 @@ def get_documents_count():
     """
     df = sparql_utils.run_sparql_query(query)
     return int(df["doc_count.value"].to_list()[0])
+
+
+def get_inventory_count():
+    """a helper function to fetch the documents count from SPARQL endpoit"""
+    query = """
+        SELECT (COUNT(DISTINCT ?mi) AS ?inv_count)
+            WHERE {
+                ?mi a :MineralInventory .
+                ?mi :commodity/:name ?comm .
+                ?mi :ore ?ore .
+            }
+    """
+    df = sparql_utils.run_sparql_query(query)
+    return int(df["inv_count.value"].to_list()[0])
 
 
 def get_commodities():
