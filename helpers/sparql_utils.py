@@ -38,7 +38,6 @@ def run_sparql_query(query, endpoint="https://minmod.isi.edu/sparql", values=Fal
         },
         verify=False,  # Set to False to bypass SSL verification as per the '-k' in curl
     )
-    # print(response.text)
     try:
         qres = response.json()
         if "results" in qres and "bindings" in qres["results"]:

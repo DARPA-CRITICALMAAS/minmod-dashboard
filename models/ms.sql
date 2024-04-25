@@ -44,7 +44,7 @@ WHERE {
         }
         
         ?mi :category ?mi_cat .
-        ?mi :commodity [ :name "$commodity"@en ] .
+        ?mi :commodity [ :name "$commodity" ] .
     
         {
             SELECT ?mi (MAX(?ore_val) AS ?max_ore_val) (SAMPLE(?grade_val) AS ?matched_grade_val)

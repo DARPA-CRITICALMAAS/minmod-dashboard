@@ -5,8 +5,9 @@ import sys
 CERT_FILE = "./ssl/minmod_isi_edu_cert.cer"
 KEY_FILE = "./ssl/minmod_isi_edu_key.key"
 
+FA = "https://use.fontawesome.com/releases/v5.8.1/css/all.css"
 
-app = dash.Dash(external_stylesheets=[dbc.themes.LITERA], use_pages=True)
+app = dash.Dash(external_stylesheets=[dbc.themes.LITERA, FA], use_pages=True)
 
 app.layout = dash.html.Div(
     [
@@ -36,7 +37,7 @@ app.layout = dash.html.Div(
                     ),
                     dbc.NavItem(
                         dbc.NavLink(
-                            "SPARQL Sandbox",
+                            "Advanced Search",
                             external_link=True,
                             active=True,
                             href="sparql",
@@ -52,7 +53,6 @@ app.layout = dash.html.Div(
 
 # Run app and display result inline in the notebook
 if __name__ == "__main__":
-    print(sys.argv)
     if sys.argv[1] == "dev":
         app.run_server(host="0.0.0.0", port=8050)
     if sys.argv[1] == "prod":

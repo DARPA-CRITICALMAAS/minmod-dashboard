@@ -27,7 +27,7 @@ sample_queries:
                 ?ms :location_info [ :location ?loc_wkt ] .
                 
                 ?ms :mineral_inventory ?mi .
-                ?mi :commodity [ :name "Nickel"@en ] .
+                ?mi :commodity [ :name "nickel" ] .
             }
   - name: Grade-Tonnage models
     description: Grade-Tonnage models
@@ -51,7 +51,7 @@ sample_queries:
                 }
                 
                 ?mi :category ?mi_cat .
-                ?mi :commodity [ :name "Nickel"@en ] .
+                ?mi :commodity [ :name "nickel" ] .
                 
                 OPTIONAL { ?mi :ore [ :ore_value ?ore_val;
                                       :ore_unit  ?ore_unit] .

@@ -142,12 +142,12 @@ def update_output(n_clicks, query):
                         style={
                             "width": "100%",
                             "height": "600px",
-                        },  # Adjust based on your preference
+                        },
                         columnDefs=column_defs,
                         rowData=df.to_dict("records"),
-                        columnSize="SizeToFit",
+                        columnSize="autoSize",
                         columnSizeOptions={
-                            "defaultMinWidth": 100,
+                            "defaultMinWidth": 150,
                         },
                         defaultColDef={
                             "resizable": True,

@@ -7,5 +7,5 @@ SELECT ?ms ?name ?msr ?mss ?loc_wkt
           ?ms :location_info [ :location ?loc_wkt ] .
           
           ?ms :mineral_inventory ?mi .
-          ?mi :commodity [ :name "$commodity"@en ] .
+          ?mi :commodity [ :name "$commodity" ] .
       }

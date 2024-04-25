@@ -17,9 +17,12 @@ def safe_wkt_load(wkt_str):
         return None
 
 
-def get_geo_model(gm):
+def get_geo_model(gm, theme):
 
-    # Apply the function to convert WKT strings to geometry objects
+    # Cleaning wkt points
+    gm.df["loc_wkt.value"] = gm.df["loc_wkt.value"].apply(
+        lambda x: x.replace(",", " ") if x.startswith("POINT") else x
+    )
     gm.df["geometry"] = gm.df["loc_wkt.value"].apply(safe_wkt_load)
     gdf = gpd.GeoDataFrame(gm.df, geometry="geometry", crs="epsg:4326")
     gdf = gdf.dropna(subset=["geometry"])
@@ -36,7 +39,7 @@ def get_geo_model(gm):
     gdf["lon"] = gdf["geometry"].x
     gdf["lat"] = gdf["geometry"].y
 
-    # invalid_geo_df = gdf[~gdf["lat"].between(-90, 90) | ~gdf["lon"].between(-180, 180)]
+    # check if invalid invalid_geo_df = gdf[~gdf["lat"].between(-90, 90) | ~gdf["lon"].between(-180, 180)]
     gdf = gdf[(gdf["lat"].between(-90, 90)) & (gdf["lon"].between(-180, 180))]
 
     gm.set_gdf(gdf)
@@ -47,36 +50,40 @@ def get_geo_model(gm):
         lon="lon",
         hover_name="name.value",
         zoom=2,
+        color_discrete_sequence=["red"],
+        size_max=30,
         height=900,
     )
 
-    # Setting Map Style
-    geo_model.update_layout(mapbox_style="open-street-map")
-    # geo_model.update_layout(
-    #     mapbox_style="white-bg",
-    #     mapbox_layers=[
-    #         {
-    #             "below": "traces",
-    #             "sourcetype": "raster",
-    #             "sourceattribution": "United States Geological Survey",
-    #             "source": [
-    #                 "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
-    #             ],
-    #         }
-    #     ],
-    # )
+    # Setting Map Style and toggle based on theme
+    if theme == "light":
+        geo_model.update_layout(mapbox_style="open-street-map")
+    else:
+        geo_model.update_layout(
+            mapbox_style="white-bg",
+            mapbox_layers=[
+                {
+                    "below": "traces",
+                    "sourcetype": "raster",
+                    "sourceattribution": "United States Geological Survey",
+                    "source": [
+                        "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
+                    ],
+                }
+            ],
+        )
     geo_model.update_layout(margin={"r": 0, "t": 50, "l": 0, "b": 10})
 
     return geo_model
 
 
-def geo_model_card(geo_min):
+def geo_model_card(geo_min, theme):
     return dbc.Card(
         dbc.CardBody(
             [
                 dcc.Graph(
                     id="clickable-geo-plot",
-                    figure=get_geo_model(geo_min),
+                    figure=get_geo_model(geo_min, theme),
                     config={
                         "displayModeBar": True,
                         "displaylogo": False,

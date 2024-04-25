@@ -2,18 +2,14 @@ import dash
 from dash import html, callback, clientside_callback, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
-import pandas as pd
 import dash
-from datetime import date
-from dash_ag_grid import AgGrid
-from components import stats_card, pie_card, gt_model_card
+from helpers import kpis
+from components import stats_card, gt_model_card
 from helpers import sparql_utils
 from models import GradeTonnage
 
-# pivot_df = pd.read_csv("flat_mineral_site_data.v4.csv")
-gt = GradeTonnage(commodity="Nickel", query_path="./models/gt.sql")
+gt = GradeTonnage(commodity="nickel", query_path="./models/gt.sql")
 gt.init(get_sparql_data=sparql_utils.run_minmod_query)
-commodities = ["Zinc (Zn)", "Nickel (Ni)"]
 
 dash.register_page(__name__)
 
@@ -24,14 +20,16 @@ layout = html.Div(
                 [
                     dbc.Row(
                         dbc.Col(
-                            dcc.Dropdown(
-                                id="commodity",
-                                options=[
-                                    {"label": commodity, "value": commodity}
-                                    for commodity in commodities
-                                ],
-                                value="Nickel (Ni)",
-                                placeholder="Search Commodity",
+                            dbc.Spinner(
+                                dcc.Dropdown(
+                                    id="commodity",
+                                    options=[
+                                        {"label": commodity, "value": commodity}
+                                        for commodity in kpis.get_commodities()
+                                    ],
+                                    value="nickel",
+                                    placeholder="Search Commodity",
+                                ),
                             ),
                             width=2,
                         ),
@@ -48,6 +46,7 @@ layout = html.Div(
                                     id="render-plot",
                                 ),
                                 size="lg",
+                                spinner_style={"width": "4rem", "height": "4rem"},
                             )
                         ],
                         className="my-2",
@@ -72,7 +71,13 @@ def update_output(selected_commodity):
         return gt_model_card(gt)
     selected_commodity = selected_commodity.split()[0]
     gt.update_commodity(selected_commodity)
-    gt.init(get_sparql_data=sparql_utils.run_minmod_query)
+    try:
+        gt.init(get_sparql_data=sparql_utils.run_minmod_query)
+    except:
+        return dbc.Alert(
+            "No results found or there was an error with the query.",
+            color="danger",
+        )
     return gt_model_card(gt)
 
 
@@ -83,8 +88,8 @@ def update_output(selected_commodity):
 )
 def open_url(clickData):
     if clickData:
-        filtered_df = gt.df[gt.df["ms_name.value"] == clickData["points"][0]["text"]]
-        return filtered_df["ms.value"]
+        filtered_df = gt.df[gt.df["ms_name"] == clickData["points"][0]["text"]]
+        return filtered_df["ms"]
 
 
 # Clientside function to open a new tab
@@ -96,6 +101,6 @@ clientside_callback(
         }
     }
     """,
-    Output("url-div", "children"),  # Dummy output, we don't use it
+    Output("url-div", "children"),
     [Input("url", "children")],  # Input is the URL to open
 )
