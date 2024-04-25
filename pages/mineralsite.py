@@ -185,10 +185,22 @@ def update_dashboard(
 
 def update_grid(df):
     if df is not None and not df.empty:
-        column_defs = [
-            {"header_name": col, "field": col, "cellRenderer": "urlLink"}
-            for col in df.columns
-        ]
+        column_defs = []
+        for col in df.columns:
+            if col == "Mineral Site Name":
+                column_defs.append(
+                    {
+                        "headerName": col,
+                        "field": col,
+                        "cellRenderer": "markdown",
+                        "linkTarget": "_blank",
+                    }
+                )
+            else:
+                column_defs.append(
+                    {"headerName": col, "field": col, "cellRenderer": "urlLink"}
+                )
+
         column_defs.insert(
             0, {"headerName": "Row ID", "valueGetter": {"function": "params.node.id"}}
         )

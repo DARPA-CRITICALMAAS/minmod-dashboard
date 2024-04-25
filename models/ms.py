@@ -42,4 +42,9 @@ class MineralSite:
             "Country",
             "Loc Wkt",
         ]
+        df["Mineral Site Name"] = df.apply(
+            lambda row: f"[{row['Mineral Site Name']}]({row['Mineral Site URI']})",
+            axis=1,
+        )
+        df = df.drop(["Mineral Site URI"], axis=1)
         return df
