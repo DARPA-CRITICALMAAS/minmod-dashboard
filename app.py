@@ -47,8 +47,11 @@ app.layout = dash.html.Div(
                 style={"margin-left": "10px"},
             )
         ),
+        dash.html.Hr(
+            style={"margin": "0px"},
+        ),
         dash.page_container,
-    ]
+    ],
 )
 
 # Run app and display result inline in the notebook

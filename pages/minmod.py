@@ -22,123 +22,132 @@ gm.init(get_sparql_data=sparql_utils.run_minmod_query)
 def render():
     return html.Div(
         [
-            dbc.Card(
-                dbc.CardBody(
-                    [
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    dbc.Row(
-                                        dbc.Col(
-                                            html.Div(
-                                                [
-                                                    dbc.Row(
-                                                        dbc.Card(
-                                                            html.Div(
-                                                                [
-                                                                    html.H3(
-                                                                        [
-                                                                            "Number of Mineral Sites"
-                                                                        ]
-                                                                    ),
-                                                                    dbc.Spinner(
-                                                                        html.H4(
-                                                                            ["empty"],
-                                                                            id="mineral-sites-count-card",
-                                                                        ),
-                                                                    ),
-                                                                ],
-                                                                className=f"border-sucess border-start border-5",
-                                                            ),
-                                                            className="text-center text-nowrap my-2 p-2",
-                                                        )
-                                                    ),
-                                                    dbc.Row(
-                                                        dbc.Spinner(
-                                                            html.Div(
-                                                                html.Div(
-                                                                    style={
-                                                                        "margin-top": "50px"
-                                                                    }
-                                                                ),
-                                                                id="pie--card--min",
-                                                            ),
-                                                        )
-                                                    ),
-                                                    dbc.Row(
-                                                        dbc.Card(
-                                                            html.Div(
-                                                                [
-                                                                    html.H3(
-                                                                        [
-                                                                            "Number of Inventories"
-                                                                        ]
-                                                                    ),
-                                                                    dbc.Spinner(
-                                                                        html.H4(
-                                                                            ["empty"],
-                                                                            id="inventory-count-card",
-                                                                        ),
-                                                                    ),
-                                                                ],
-                                                                className=f"border-sucess border-start border-5",
-                                                            ),
-                                                            className="text-center text-nowrap my-2 p-2",
-                                                        )
-                                                    ),
-                                                    dbc.Row(
-                                                        dbc.Spinner(
-                                                            html.Div(
-                                                                html.Div(
-                                                                    style={
-                                                                        "margin-top": "50px"
-                                                                    }
-                                                                ),
-                                                                id="pie--card",
-                                                            ),
-                                                        )
-                                                    ),
-                                                    dbc.Row(
-                                                        dbc.Card(
-                                                            html.Div(
-                                                                [
-                                                                    html.H3(
-                                                                        [
-                                                                            "Number of Documents"
-                                                                        ]
-                                                                    ),
-                                                                    dbc.Spinner(
-                                                                        html.H4(
-                                                                            ["empty"],
-                                                                            id="documents-count-card",
-                                                                        ),
-                                                                    ),
-                                                                ],
-                                                                className=f"border-sucess border-start border-5",
-                                                            ),
-                                                            className="text-center text-nowrap my-2 p-2",
-                                                        )
-                                                    ),
-                                                    dbc.Row(
-                                                        dbc.Spinner(
-                                                            html.Div(
-                                                                html.Div(
-                                                                    style={
-                                                                        "margin-top": "50px"
-                                                                    }
-                                                                ),
-                                                                id="pie--card--docs",
-                                                            ),
-                                                        )
-                                                    ),
-                                                ]
-                                            ),
-                                        )
-                                    ),
-                                    width=3,
-                                ),
-                                dbc.Col(
+            dbc.Row(
+                [
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                dbc.Row(
                                     [
+                                        dbc.Row(
+                                            dbc.Card(
+                                                html.Div(
+                                                    [
+                                                        html.H3(
+                                                            ["Number of Mineral Sites"]
+                                                        ),
+                                                        dbc.Spinner(
+                                                            html.H4(
+                                                                ["empty"],
+                                                                id="mineral-sites-count-card",
+                                                            ),
+                                                        ),
+                                                    ],
+                                                    className=f"border-sucess border-start border-5",
+                                                ),
+                                                className="text-center text-nowrap my-2 p-2",
+                                            )
+                                        ),
+                                        dbc.Row(
+                                            dbc.Spinner(
+                                                html.Div(
+                                                    html.Div(
+                                                        style={"margin-top": "50px"}
+                                                    ),
+                                                    id="pie--card--min",
+                                                ),
+                                            )
+                                        ),
+                                    ]
+                                ),
+                                width=4,
+                            ),
+                            dbc.Col(
+                                dbc.Row(
+                                    [
+                                        dbc.Row(
+                                            dbc.Card(
+                                                html.Div(
+                                                    [
+                                                        html.H3(
+                                                            ["Number of Inventories"]
+                                                        ),
+                                                        dbc.Spinner(
+                                                            html.H4(
+                                                                ["empty"],
+                                                                id="inventory-count-card",
+                                                            ),
+                                                        ),
+                                                    ],
+                                                    className=f"border-sucess border-start border-5",
+                                                ),
+                                                className="text-center text-nowrap my-2 p-2",
+                                            )
+                                        ),
+                                        dbc.Row(
+                                            dbc.Spinner(
+                                                html.Div(
+                                                    html.Div(
+                                                        style={"margin-top": "50px"}
+                                                    ),
+                                                    id="pie--card",
+                                                ),
+                                            )
+                                        ),
+                                    ]
+                                ),
+                                width=4,
+                            ),
+                            dbc.Col(
+                                dbc.Row(
+                                    [
+                                        dbc.Row(
+                                            dbc.Card(
+                                                html.Div(
+                                                    [
+                                                        html.H3(
+                                                            ["Number of Documents"]
+                                                        ),
+                                                        dbc.Spinner(
+                                                            html.H4(
+                                                                ["empty"],
+                                                                id="documents-count-card",
+                                                            ),
+                                                        ),
+                                                    ],
+                                                    className=f"border-sucess border-start border-5",
+                                                ),
+                                                className="text-center text-nowrap my-2 p-2",
+                                            )
+                                        ),
+                                        dbc.Row(
+                                            dbc.Spinner(
+                                                html.Div(
+                                                    html.Div(
+                                                        style={"margin-top": "50px"}
+                                                    ),
+                                                    id="pie--card--docs",
+                                                ),
+                                            )
+                                        ),
+                                    ]
+                                ),
+                                width=4,
+                            ),
+                        ],
+                        style={
+                            "padding-left": "40px",
+                            "margin-bottom": "30px",
+                            "margin-top": "20px",
+                        },
+                    ),
+                    dbc.Row(),
+                    dbc.Row(
+                        [
+                            dbc.Card(
+                                dbc.CardBody(
+                                    [
+                                        dbc.Row(html.H3("Map View")),
                                         dbc.Row(
                                             [
                                                 dbc.Col(
@@ -156,6 +165,8 @@ def render():
                                                             placeholder="Search Commodity",
                                                             style={
                                                                 "margin-bottom": "5px",
+                                                                "margin-top": "20px",
+                                                                "margin-left": "5px",
                                                             },
                                                         ),
                                                     ),
@@ -170,7 +181,10 @@ def render():
                                                         id="theme-toggle-button",
                                                         color="default",
                                                         className="mr-1",
-                                                        style={"border": "1px"},
+                                                        style={
+                                                            "border": "1px",
+                                                            "margin-top": "20px",
+                                                        },
                                                     ),
                                                     width=3,
                                                 ),
@@ -183,17 +197,14 @@ def render():
                                                 id="render-geo-plot",
                                             )
                                         ),
-                                    ],
-                                    width=9,
-                                    className="my-2",
-                                    style={"height": "100%"},
-                                ),
-                            ],
-                            align="start",
-                        ),
-                    ],
-                ),
-                style={"height": "200vh"},
+                                    ]
+                                )
+                            )
+                        ],
+                        style={"padding-left": "40px"},
+                    ),
+                ],
+                align="start",
             ),
             dcc.Interval(
                 id="interval-component",
