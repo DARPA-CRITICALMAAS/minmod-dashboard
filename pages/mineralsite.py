@@ -16,76 +16,67 @@ dash.register_page(__name__)
 
 layout = html.Div(
     [
-        dbc.Card(
-            dbc.CardBody(
-                [
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                [
-                                    dbc.Label("Commodity"),
-                                    dbc.Spinner(
-                                        dcc.Dropdown(
-                                            id="commodity",
-                                            options=[
-                                                {"label": commodity, "value": commodity}
-                                                for commodity in kpis.get_commodities()
-                                            ],
-                                            search_value="",
-                                            placeholder="Search Commodity",
-                                        ),
-                                    ),
-                                ],
-                                width=3,
-                            ),
-                            dbc.Col(
-                                [
-                                    dbc.Label("Deposit Type"),
-                                    dcc.Dropdown(
-                                        id="deposit_type",
-                                        options=[],
-                                        multi=True,
-                                        search_value="",
-                                        placeholder="Search Deposit Type",
-                                    ),
-                                ],
-                                width=3,
-                            ),
-                            dbc.Col(
-                                [
-                                    dbc.Label("Country"),
-                                    dcc.Dropdown(
-                                        id="country",
-                                        options=[],
-                                        multi=True,
-                                        search_value="",
-                                        placeholder="Search Country",
-                                    ),
-                                ],
-                                width=3,
-                            ),
-                        ]
-                    ),
-                    html.Br(),
-                    html.Br(),
-                    html.Br(),
-                    html.Br(),
-                    dbc.Row(
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dbc.Label("Commodity"),
                         dbc.Spinner(
-                            html.Div(
-                                id="mineral-site-results"
-                            ),  # Wrapped by dbc.Spinner
-                            color="primary",  # Spinner color
-                            type="border",  # Spinner type
-                            fullscreen=False,  # Set True for fullscreen spinner, False to wrap content
-                            size="lg",
-                        )
-                    ),
-                ],
-            ),
-            style={"height": "100vh"},
+                            dcc.Dropdown(
+                                id="commodity",
+                                options=[
+                                    {"label": commodity, "value": commodity}
+                                    for commodity in kpis.get_commodities()
+                                ],
+                                search_value="",
+                                placeholder="Search Commodity",
+                            ),
+                        ),
+                    ],
+                    width=3,
+                ),
+                dbc.Col(
+                    [
+                        dbc.Label("Deposit Type"),
+                        dcc.Dropdown(
+                            id="deposit_type",
+                            options=[],
+                            multi=True,
+                            search_value="",
+                            placeholder="Search Deposit Type",
+                        ),
+                    ],
+                    width=3,
+                ),
+                dbc.Col(
+                    [
+                        dbc.Label("Country"),
+                        dcc.Dropdown(
+                            id="country",
+                            options=[],
+                            multi=True,
+                            search_value="",
+                            placeholder="Search Country",
+                        ),
+                    ],
+                    width=3,
+                ),
+            ]
         ),
-    ]
+        html.Br(),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            dbc.Spinner(
+                html.Div(id="mineral-site-results"),  # Wrapped by dbc.Spinner
+                color="primary",  # Spinner color
+                type="border",  # Spinner type
+                fullscreen=False,  # Set True for fullscreen spinner, False to wrap content
+                size="lg",
+            )
+        ),
+    ],
+    style={"margin": "20px"},
 )
 
 
@@ -208,7 +199,7 @@ def update_grid(df):
             [
                 AgGrid(
                     id="ms_table",
-                    style={"width": "100%", "height": "600px"},
+                    style={"width": "100%", "height": "70vh"},
                     columnDefs=column_defs,
                     rowData=df.to_dict("records"),
                     columnSize="autoSize",

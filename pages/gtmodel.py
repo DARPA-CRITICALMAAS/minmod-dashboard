@@ -53,7 +53,7 @@ layout = html.Div(
                     ),
                 ],
             ),
-            style={"height": "95vh", "margin": "10px"},
+            style={"height": "95vh", "margin": "10px", "margin-top": "30px"},
         ),
         html.Div(id="url", style={"display": "none"}),
         # Dummy div to satisfy Dash callback requirements
