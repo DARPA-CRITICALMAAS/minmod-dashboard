@@ -1,5 +1,5 @@
 from helpers import sparql_utils
-import time
+import numpy as np
 
 
 def get_mineral_inventories():
@@ -62,10 +62,14 @@ def get_docs_per_commodity():
             WHERE {
                 ?mi :reference/:document ?doc .
                 ?mi :commodity/:name ?comm .
+                ?mi :ore ?ore .
             }
             GROUP BY ?comm
     """
     df = sparql_utils.run_sparql_query(query)
+    # df["doc_count.value"] = df["doc_count.value"].astype(int)
+    # df["comm_updated"] = np.where(df["doc_count.value"] < 4, "others", df["comm.value"])
+    # df = df.groupby("comm_updated")["doc_count.value"].sum().reset_index()
     return {
         "labels": df["comm.value"].to_list(),
         "values": df["doc_count.value"].to_list(),
