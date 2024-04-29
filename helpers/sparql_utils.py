@@ -76,15 +76,30 @@ def run_geokb_query(query, values=False):
     )
 
 
+def infer_and_convert_types(df, round_flag=False):
+    for column in df.columns:
+        # Try to convert to numeric (int or float)
+        try:
+            df[column] = pd.to_numeric(df[column])
+            # After conversion, round to three decimal places if it's a float
+            if round_flag:
+                if df[column].dtype == float:
+                    df[column] = df[column].round(3)
+        except (ValueError, TypeError):
+            # If conversion fails, keep as string
+            df[column] = df[column].astype(str)
+    return df
+
+
 if __name__ == "__main__":
     sample_query = """
-    SELECT ?ci ?cn ?cg ?ce
-            WHERE {
-                ?ci a :DepositType .
-                ?ci rdfs:label ?cn .
-                ?ci :deposit_group ?cg .
-                ?ci :environment ?ce .
-            } 
+    SELECT DISTINCT ?comm (COUNT(DISTINCT ?doc) AS ?doc_count)
+    WHERE {
+        ?mi a :MineralInventory .
+        ?mi :reference/:document ?doc .
+        ?mi :commodity/:name ?comm
+    }
+    GROUP BY ?comm
     """
     df = run_sparql_query(query=sample_query, values=True)
     print(df)

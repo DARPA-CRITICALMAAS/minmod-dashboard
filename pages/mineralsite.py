@@ -175,6 +175,7 @@ def update_dashboard(
 
 
 def update_grid(df):
+    df = sparql_utils.infer_and_convert_types(df, round_flag=True)
     if df is not None and not df.empty:
         column_defs = []
         for col in df.columns:

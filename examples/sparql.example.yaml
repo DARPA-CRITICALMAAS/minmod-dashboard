@@ -8,14 +8,6 @@ sample_queries:
                 FILTER(!isBlank(?instance))
                 FILTER(!isLiteral(?instance))
             }
-  - name: number of classes
-    description: number of classes
-    query: |
-      SELECT (COUNT(DISTINCT ?class) AS ?count)
-            WHERE {
-                ?class a rdfs:Class .
-                FILTER(!isBlank(?class))  # exclude blank nodes
-            }
   - name: Nickel MineralSite instances
     description: Nickel MineralSite instances
     query: |

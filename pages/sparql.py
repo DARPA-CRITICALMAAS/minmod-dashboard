@@ -119,6 +119,8 @@ def update_output(n_clicks, query):
     if query:
         # Execute the SPARQL query
         df = sparql_utils.run_minmod_query(query, values=True)
+        df.columns = list(map(lambda x: x.split(".value")[0], df.columns))
+        df = sparql_utils.infer_and_convert_types(df)
         if df is not None and not df.empty:
             # Convert DataFrame for AgGrid
 
@@ -167,7 +169,7 @@ def update_output(n_clicks, query):
                     ),
                     html.Br(),
                     html.Div(
-                        dbc.Button("Download CSV", id="csv-button", n_clicks=0),
+                        dbc.Button("Download CSV", id="csv-button-sparql", n_clicks=0),
                         className="d-grid col-2 mx-auto",
                         style={
                             "float": "right",
@@ -188,7 +190,7 @@ def update_output(n_clicks, query):
 
 @callback(
     Output("query_table", "exportDataAsCsv"),
-    Input("csv-button", "n_clicks"),
+    Input("csv-button-sparql", "n_clicks"),
 )
 def export_data_as_csv(n_clicks):
     if n_clicks:
