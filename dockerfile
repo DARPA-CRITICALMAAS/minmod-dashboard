@@ -19,4 +19,4 @@ ENV NAME World
 EXPOSE 8050
 
 # Run app.py when the container launches
-CMD ["python", "./app.py"]
+CMD ["python", "./app.py", "prod"]

@@ -1,140 +1,236 @@
 import dash
 from dash import html, callback, clientside_callback, dcc
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import pandas as pd
 import dash
 from datetime import date
+from helpers import kpis
+from helpers import sparql_utils
 from dash_ag_grid import AgGrid
+from models import MineralSite
+from dash.exceptions import PreventUpdate
 
-
-# will be replaced with SPARQL
-pivot_df = pd.read_csv("flat_mineral_site_data.v4.csv")
-commodities = ["Zinc (Zn)", "Nickel (Ni)", "Lead (Pb)"]
-countries = ["US", "CA"]
-column_defs = [
-    {
-        "header_name": col,
-        "field": col,
-        "cellRenderer": "markdown",
-    }
-    for col in pivot_df.columns
-]
-
-# will be replaced with SPARQL
-labels = ["Nickel", "Zinc"]
-values = [1049, 1078]
 
 dash.register_page(__name__)
 
 layout = html.Div(
     [
-        dbc.Card(
-            dbc.CardBody(
-                [
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                [
-                                    dbc.Label("Commodity"),
-                                    dcc.Dropdown(
-                                        id="commodity",
-                                        options=[
-                                            {"label": commodity, "value": commodity}
-                                            for commodity in commodities
-                                        ],
-                                        search_value="",
-                                        placeholder="Search Commodity",
-                                    ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dbc.Label("Commodity"),
+                        dbc.Spinner(
+                            dcc.Dropdown(
+                                id="commodity",
+                                options=[
+                                    {"label": commodity, "value": commodity}
+                                    for commodity in kpis.get_commodities()
                                 ],
-                                width=3,
+                                search_value="",
+                                placeholder="Search Commodity",
                             ),
-                            dbc.Col(
-                                [
-                                    dbc.Label("Deposit Type"),
-                                    dcc.Dropdown(
-                                        id="deposit_type",
-                                        options=[
-                                            {
-                                                "label": deposit_type,
-                                                "value": deposit_type,
-                                            }
-                                            for deposit_type in list(
-                                                set(pivot_df["deposit_type"])
-                                            )
-                                        ],
-                                        multi=True,
-                                        search_value="",
-                                        placeholder="Search Deposit Type",
-                                    ),
-                                ],
-                                width=3,
-                            ),
-                            dbc.Col(
-                                [
-                                    dbc.Label("Country"),
-                                    dcc.Dropdown(
-                                        id="country",
-                                        options=[
-                                            {"label": country, "value": country}
-                                            for country in countries
-                                        ],
-                                        multi=True,
-                                        search_value="",
-                                        placeholder="Search Country",
-                                    ),
-                                ],
-                                width=3,
-                            ),
-                            dbc.Col(
-                                [
-                                    dbc.Label("Date Range"),
-                                    html.Br(),
-                                    dcc.DatePickerRange(
-                                        id="my-date-picker-range",
-                                        min_date_allowed=date(1995, 8, 5),
-                                        max_date_allowed=date(2024, 12, 1),
-                                        initial_visible_month=date(2024, 3, 5),
-                                        # end_date=date.today(),
-                                    ),
-                                ],
-                                width=3,
-                            ),
-                        ]
-                    ),
-                    html.Br(),
-                    dbc.Row(
-                        AgGrid(
-                            id="query_table",
-                            style={
-                                "width": "100%",
-                                "height": "80vh",
-                            },  # Adjust based on your preference
-                            columnDefs=column_defs,
-                            rowData=pivot_df.to_dict("records"),
-                            columnSize="SizeToFit",
-                            columnSizeOptions={
-                                "defaultMinWidth": 100,
-                            },
-                            defaultColDef={
-                                "resizable": True,
-                                "sortable": True,
-                                "filter": True,
-                            },
-                            dashGridOptions={
-                                "pagination": True,
-                                "paginationPageSize": 20,
-                                "suppressFieldDotNotation": True,
-                                "enableCellTextSelection": True,
-                            },
-                            csvExportParams={
-                                "fileName": "export_data.csv",
-                            },
-                        )
-                    ),
-                ],
-            ),
-            style={"height": "100vh"},
+                        ),
+                    ],
+                    width=3,
+                ),
+                dbc.Col(
+                    [
+                        dbc.Label("Deposit Type"),
+                        dcc.Dropdown(
+                            id="deposit_type",
+                            options=[],
+                            multi=True,
+                            search_value="",
+                            placeholder="Search Deposit Type",
+                        ),
+                    ],
+                    width=3,
+                ),
+                dbc.Col(
+                    [
+                        dbc.Label("Country"),
+                        dcc.Dropdown(
+                            id="country",
+                            options=[],
+                            multi=True,
+                            search_value="",
+                            placeholder="Search Country",
+                        ),
+                    ],
+                    width=3,
+                ),
+            ]
         ),
-    ]
+        html.Br(),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            dbc.Spinner(
+                html.Div(id="mineral-site-results"),  # Wrapped by dbc.Spinner
+                color="primary",  # Spinner color
+                type="border",  # Spinner type
+                fullscreen=False,  # Set True for fullscreen spinner, False to wrap content
+                size="lg",
+            )
+        ),
+    ],
+    style={"margin": "20px"},
 )
+
+
+@callback(
+    [
+        Output("deposit_type", "options"),
+        Output("country", "options"),
+        Output("mineral-site-results", "children"),
+    ],
+    [
+        Input("commodity", "value"),
+        Input("deposit_type", "value"),
+        Input("country", "value"),
+    ],
+    [State("deposit_type", "options"), State("country", "options")],
+    prevent_initial_call=True,
+)
+def update_dashboard(
+    selected_commodity,
+    selected_deposit_types,
+    selected_countries,
+    current_deposit_options,
+    current_country_options,
+):
+    """A callback to update the table data, and dropdown values"""
+    ctx = dash.callback_context
+
+    if not ctx.triggered:
+        raise PreventUpdate
+
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if trigger_id == "commodity" and selected_commodity:
+        deposit_options = []
+        country_options = []
+        # Initial grid update with new commodity selection
+        ms = MineralSite(commodity=selected_commodity, query_path="./models/sql/ms.sql")
+        try:
+            ms.init(get_sparql_data=sparql_utils.run_minmod_query)
+            df = ms.df
+            # Update deposit type options based on the selected commodity
+            deposit_options = [{"label": dt, "value": dt} for dt in ms.deposit_types]
+
+            # Update country options based on the selected commodity
+            country_options = [
+                {"label": country, "value": country} for country in ms.country
+            ]
+        except:
+            return (
+                deposit_options,
+                country_options,
+                dbc.Alert(
+                    "No results found or there was an error with the query.",
+                    color="danger",
+                ),
+            )
+
+        grid_content = update_grid(df)
+        return deposit_options, country_options, grid_content
+
+    elif trigger_id in ["deposit_type", "country"]:
+        # Refilter based on both deposit type and country
+        ms = MineralSite(commodity=selected_commodity, query_path="./models/sql/ms.sql")
+        try:
+            ms.init(get_sparql_data=sparql_utils.run_minmod_query)
+            df = ms.df
+
+            if selected_deposit_types:
+                df = df[df["Deposit Name"].isin(selected_deposit_types)]
+                # Refilter countries based on deposit type
+                filtered_countries = df["Country"].unique()
+                country_options = [
+                    {"label": country, "value": country}
+                    for country in filtered_countries
+                ]
+            else:
+                country_options = current_country_options
+
+            if selected_countries:
+                df = df[df["Country"].isin(selected_countries)]
+
+        except:
+            return (
+                current_deposit_options,
+                current_country_options,
+                dbc.Alert(
+                    "No results found or there was an error with the query.",
+                    color="danger",
+                ),
+            )
+
+        grid_content = update_grid(df)
+        return current_deposit_options, country_options, grid_content
+
+    raise PreventUpdate
+
+
+def update_grid(df):
+    df = sparql_utils.infer_and_convert_types(df, round_flag=True)
+    if df is not None and not df.empty:
+        column_defs = []
+        for col in df.columns:
+            if col == "Mineral Site Name":
+                column_defs.append(
+                    {
+                        "headerName": col,
+                        "field": col,
+                        "cellRenderer": "markdown",
+                        "linkTarget": "_blank",
+                    }
+                )
+            else:
+                column_defs.append(
+                    {"headerName": col, "field": col, "cellRenderer": "urlLink"}
+                )
+
+        column_defs.insert(
+            0, {"headerName": "Row ID", "valueGetter": {"function": "params.node.id"}}
+        )
+        return html.Div(
+            [
+                AgGrid(
+                    id="ms_table",
+                    style={"width": "100%", "height": "70vh"},
+                    columnDefs=column_defs,
+                    rowData=df.to_dict("records"),
+                    columnSize="autoSize",
+                    columnSizeOptions={"defaultMinWidth": 150},
+                    defaultColDef={"resizable": True, "sortable": True, "filter": True},
+                    dashGridOptions={
+                        "pagination": True,
+                        "paginationPageSize": 20,
+                        "suppressFieldDotNotation": True,
+                        "enableCellTextSelection": True,
+                    },
+                    csvExportParams={"fileName": "export_data.csv"},
+                ),
+                html.Br(),
+                html.Div(
+                    dbc.Button("Download CSV", id="ms-csv-button", n_clicks=0),
+                    className="d-grid col-2 mx-auto",
+                    style={"float": "right", "margin-top": "-15px", "width": "10%"},
+                ),
+            ]
+        )
+    return dbc.Alert("No results found.", color="danger")
+
+
+@callback(
+    Output("ms_table", "exportDataAsCsv"),
+    Input("ms-csv-button", "n_clicks"),
+)
+def export_data_as_csv(n_clicks):
+    """A callback to handle the download button"""
+    if n_clicks:
+        return True
+    return False

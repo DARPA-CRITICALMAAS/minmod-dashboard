@@ -3,7 +3,8 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 
 
-def get_pie(labels, values):
+def get_pie(labels, values, name):
+    """a component to generate pie chart"""
     pie_figure = go.Figure(
         data=[
             go.Pie(
@@ -15,20 +16,18 @@ def get_pie(labels, values):
         ]
     )
 
-    pie_figure.update_layout(
-        title="Inventory Commodity Distribution", template="plotly_white"
-    )
+    pie_figure.update_layout(title=name, template="plotly_white")
 
     return pie_figure
 
 
-# Iris bar figure
-def pie_card(labels, values):
+def pie_card(labels, values, name):
+    """a component to generate pie chart in a dbc.Card"""
     return dbc.Card(
         dbc.CardBody(
             [
                 dcc.Graph(
-                    figure=get_pie(labels, values),
+                    figure=get_pie(labels, values, name),
                     config={"displayModeBar": True, "displaylogo": False},
                 )
             ]

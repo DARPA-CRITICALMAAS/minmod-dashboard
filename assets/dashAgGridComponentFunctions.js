@@ -1,14 +1,14 @@
 var dagcomponentfuncs = (window.dashAgGridComponentFunctions = window.dashAgGridComponentFunctions || {});
 
 dagcomponentfuncs.urlLink = function (props) {
-
-    if (props.value && props.value.startsWith('http')) {
+    // Ensure props.value is a string
+    if (typeof props.value === 'string' && props.value.startsWith('http')) {
         return React.createElement(
             'a',
-            { href: props.value, target: "_blank" },
+            { href: props.value, target: "_blank", rel: "noopener noreferrer" },
             props.value
         );
     } else {
-        return props.value
+        return props.value;
     }
 };
