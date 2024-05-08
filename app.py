@@ -214,7 +214,7 @@ app.layout = dash.html.Div(
                             "Advanced Search",
                             external_link=True,
                             active=True,
-                            href="sparql",
+                            href="sparqlsearch",
                         )
                     ),
                 ],
