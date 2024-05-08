@@ -1,6 +1,7 @@
 import dash_bootstrap_components as dbc
 import dash
 from dash import html
+from flask import Flask
 import sys
 
 CERT_FILE = "./ssl/minmod_isi_edu_cert.cer"
@@ -8,7 +9,11 @@ KEY_FILE = "./ssl/minmod_isi_edu_key.key"
 
 FA = "https://use.fontawesome.com/releases/v5.8.1/css/all.css"
 
-app = dash.Dash(external_stylesheets=[dbc.themes.LITERA, FA], use_pages=True)
+server = Flask(__name__)  # define flask app.server
+
+app = dash.Dash(
+    external_stylesheets=[dbc.themes.LITERA, FA], use_pages=True, server=server
+)
 
 header_layout = html.Div(
     [
