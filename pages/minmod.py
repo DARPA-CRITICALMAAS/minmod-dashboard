@@ -318,7 +318,7 @@ def open_url(clickData):
             (gm.gdf["lat"] == clicked_dict["lat"])
             & (gm.gdf["lon"] == clicked_dict["lon"])
         ]
-        return filtered_df["ms.value"]
+        return filtered_df["ms.value"].tolist()[0]
 
 
 @callback(
