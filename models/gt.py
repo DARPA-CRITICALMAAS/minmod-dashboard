@@ -51,5 +51,8 @@ class GradeTonnage:
                     return ms_name.replace(text, "").strip()
             return ms_name
 
-        df["ms_name"] = df["ms_name"].apply(clean_names)
+        df["ms_name_filtered"] = df["ms_name"].apply(clean_names)
+        df.loc[:, "ms_name_truncated"] = df["ms_name_filtered"].apply(
+            lambda x: " ".join(x.split()[:-3]) if len(x.split()) > 3 else x
+        )
         return df

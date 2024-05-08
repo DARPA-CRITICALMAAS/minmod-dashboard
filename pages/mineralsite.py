@@ -203,8 +203,8 @@ def update_grid(df):
                     style={"width": "100%", "height": "70vh"},
                     columnDefs=column_defs,
                     rowData=df.to_dict("records"),
-                    columnSize="autoSize",
-                    columnSizeOptions={"defaultMinWidth": 150},
+                    columnSize="responsiveSizeToFit",
+                    # columnSizeOptions={"defaultMaxWidth": 20},
                     defaultColDef={"resizable": True, "sortable": True, "filter": True},
                     dashGridOptions={
                         "pagination": True,

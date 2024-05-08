@@ -15,9 +15,23 @@ header_layout = html.Div(
         html.Img(
             src="assets/favicon.png", style={"height": "30px", "marginRight": "10px"}
         ),
-        html.Span(
-            "Min Mod",
-            style={"color": "black", "fontSize": "24px", "fontWeight": "bold"},
+        html.A(
+            [
+                html.Span(
+                    "Min Mod",
+                    style={
+                        "color": "#3f3f3f",
+                        "fontSize": "30px",
+                        "font-family": "'Source Code Pro', monospace",
+                        "padding-left": "10px",
+                        "fontWeight": "bold",
+                    },
+                ),
+            ],
+            href="https://minmod.isi.edu/",
+            style={
+                "text-decoration": "none",
+            },
         ),
     ],
     style={
@@ -145,6 +159,25 @@ footer_layout = html.Footer(
     ]
 )
 
+app.index_string = """
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>MinMod</title>
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
+        {%css%}
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+"""
 
 app.layout = dash.html.Div(
     [
