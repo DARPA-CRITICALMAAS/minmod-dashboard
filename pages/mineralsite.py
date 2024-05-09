@@ -16,6 +16,7 @@ dash.register_page(__name__)
 
 layout = html.Div(
     [
+        dcc.Location(id="url-ms", refresh=True),
         dbc.Row(
             [
                 dbc.Col(
@@ -23,7 +24,7 @@ layout = html.Div(
                         dbc.Label("Commodity"),
                         dbc.Spinner(
                             dcc.Dropdown(
-                                id="commodity",
+                                id="commodity-ms",
                                 options=[
                                     {"label": commodity, "value": commodity}
                                     for commodity in kpis.get_commodities()
@@ -81,13 +82,26 @@ layout = html.Div(
 
 
 @callback(
+    Output("commodity-ms", "options"),
+    Input(
+        "url-ms", "pathname"
+    ),  # This triggers the callback when the page is refreshed or the URL changes
+)
+def update_commodity_dropdown(pathname):
+    options = [
+        {"label": commodity, "value": commodity} for commodity in kpis.get_commodities()
+    ]
+    return options
+
+
+@callback(
     [
         Output("deposit_type", "options"),
         Output("country", "options"),
         Output("mineral-site-results", "children"),
     ],
     [
-        Input("commodity", "value"),
+        Input("commodity-ms", "value"),
         Input("deposit_type", "value"),
         Input("country", "value"),
     ],
@@ -109,7 +123,7 @@ def update_dashboard(
 
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
-    if trigger_id == "commodity" and selected_commodity:
+    if trigger_id == "commodity-ms" and selected_commodity:
         deposit_options = []
         country_options = []
         # Initial grid update with new commodity selection

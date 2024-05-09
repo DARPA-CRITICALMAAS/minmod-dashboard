@@ -22,6 +22,7 @@ gm.init(get_sparql_data=sparql_utils.run_minmod_query)
 def render():
     return html.Div(
         [
+            dcc.Location(id="url-minmod", refresh=True),
             dbc.Row(
                 [
                     dbc.Row(
@@ -285,6 +286,24 @@ def update_all_cards(_):
             )
         )
     ]
+
+
+@callback(
+    Output("commodity-main", "options"),
+    Input(
+        "url-minmod", "pathname"
+    ),  # This triggers the callback when the page is refreshed or the URL changes
+)
+def update_commodity_dropdown(pathname):
+    options = [
+        {"label": commodity, "value": commodity} for commodity in kpis.get_commodities()
+    ]
+    return options
+
+
+@callback(Output("commodity-main", "value"), Input("commodity-main", "options"))
+def set_default_commodity(options):
+    return options[0]["value"] if options else None
 
 
 @callback(
