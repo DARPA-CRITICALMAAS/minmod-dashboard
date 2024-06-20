@@ -4,9 +4,12 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from dash import dcc
 
+import numpy as np
+import plotly.graph_objects as go
+
 
 def get_gt_model(gt):
-    """a function to generate grade-tonnade plot"""
+    """A function to generate grade-tonnage plot."""
     # Define color for each unique category in 'dtnorm_labels'
     unique_labels = gt.df["deposit_name"].unique()
     colors = np.linspace(0, 1, len(unique_labels))
@@ -21,7 +24,10 @@ def get_gt_model(gt):
                 x=df_filtered["total_tonnage"],
                 y=df_filtered["total_grade"],
                 mode="markers+text",
-                text=df_filtered["ms_name"],
+                text=df_filtered[
+                    "ms_name_truncated"
+                ],  # Use truncated names for the labels on the plot
+                hovertext=df_filtered["ms_name"],  # Use full names for the hover text
                 name=d_type,
                 marker=dict(color=color_map[d_type], size=10, symbol="x"),
                 textposition="top center",

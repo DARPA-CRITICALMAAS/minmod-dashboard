@@ -15,6 +15,7 @@ dash.register_page(__name__)
 
 layout = html.Div(
     [
+        dcc.Location(id="url-gt", refresh=True),
         dbc.Card(
             dbc.CardBody(
                 [
@@ -22,7 +23,7 @@ layout = html.Div(
                         dbc.Col(
                             dbc.Spinner(
                                 dcc.Dropdown(
-                                    id="commodity",
+                                    id="commodity-gt",
                                     options=[
                                         {"label": commodity, "value": commodity}
                                         for commodity in kpis.get_commodities()
@@ -53,7 +54,7 @@ layout = html.Div(
                     ),
                 ],
             ),
-            style={"height": "95vh", "margin": "10px", "margin-top": "30px"},
+            style={"height": "105vh", "margin": "10px", "margin-top": "30px"},
         ),
         html.Div(id="url", style={"display": "none"}),
         # Dummy div to satisfy Dash callback requirements
@@ -63,8 +64,26 @@ layout = html.Div(
 
 
 @callback(
+    Output("commodity-gt", "options"),
+    Input(
+        "url-gt", "pathname"
+    ),  # This triggers the callback when the page is refreshed or the URL changes
+)
+def update_commodity_dropdown(pathname):
+    options = [
+        {"label": commodity, "value": commodity} for commodity in kpis.get_commodities()
+    ]
+    return options
+
+
+@callback(Output("commodity-gt", "value"), Input("commodity-gt", "options"))
+def set_default_commodity(options):
+    return options[0]["value"] if options else None
+
+
+@callback(
     Output("render-plot", "children"),
-    [Input("commodity", "value")],
+    [Input("commodity-gt", "value")],
 )
 def update_output(selected_commodity):
     """A callback to render grade tonnage model based on the commodity selected"""
@@ -90,8 +109,10 @@ def update_output(selected_commodity):
 def open_url(clickData):
     """A callback to open the clicked url on a new tab"""
     if clickData:
-        filtered_df = gt.df[gt.df["ms_name"] == clickData["points"][0]["text"]]
-        return filtered_df["ms"]
+        filtered_df = gt.df[
+            gt.df["ms_name_truncated"] == clickData["points"][0]["text"]
+        ]
+        return filtered_df["ms"].tolist()[0]
 
 
 # Clientside function to open a new tab

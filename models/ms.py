@@ -26,25 +26,36 @@ class MineralSite:
     def clean_df(self, df):
         """A cleaner method to clean the raw data obtained from the SPARQL endpoint"""
         df.columns = list(map(lambda x: x.split(".value")[0], df.columns))
-        df.columns = [
+
+        selected_columns = [
+            "ms",
+            "ms_name",
+            "deposit_name",
+            "total_tonnage_measured",
+            "total_tonnage_indicated",
+            "total_tonnage_inferred",
+            "total_tonnage",
+            "total_grade",
+            "country",
+            "loc_wkt",
+        ]
+
+        df_selected = df[selected_columns]
+        df_selected.columns = [
             "Mineral Site URI",
             "Mineral Site Name",
             "Deposit Name",
             "Total Tonnage Measured",
             "Total Tonnage Indicated ",
             "Total Tonnage Inferred",
-            "Total Contained Measured",
-            "Total Contained Indicated",
-            "Total Contained Inferred",
             "Total Tonnage",
-            "Total Contained Metal",
             "Total Grade",
             "Country",
             "Loc Wkt",
         ]
-        df["Mineral Site Name"] = df.apply(
+        df_selected["Mineral Site Name"] = df_selected.apply(
             lambda row: f"[{row['Mineral Site Name']}]({row['Mineral Site URI']})",
             axis=1,
         )
-        df = df.drop(["Mineral Site URI"], axis=1)
-        return df
+        df_selected = df_selected.drop(["Mineral Site URI"], axis=1)
+        return df_selected
