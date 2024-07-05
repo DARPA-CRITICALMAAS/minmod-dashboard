@@ -127,10 +127,11 @@ def update_dashboard(
         deposit_options = []
         country_options = []
         # Initial grid update with new commodity selection
-        ms = MineralSite(commodity=selected_commodity, query_path="./models/sql/ms.sql")
+        ms = MineralSite(commodity=selected_commodity)
         try:
-            ms.init(get_sparql_data=sparql_utils.run_minmod_query)
+            ms.init()
             df = ms.df
+            print(df)
             # Update deposit type options based on the selected commodity
             deposit_options = [{"label": dt, "value": dt} for dt in ms.deposit_types]
 
@@ -153,13 +154,13 @@ def update_dashboard(
 
     elif trigger_id in ["deposit_type", "country"]:
         # Refilter based on both deposit type and country
-        ms = MineralSite(commodity=selected_commodity, query_path="./models/sql/ms.sql")
+        ms = MineralSite(commodity=selected_commodity)
         try:
-            ms.init(get_sparql_data=sparql_utils.run_minmod_query)
+            ms.init()
             df = ms.df
 
             if selected_deposit_types:
-                df = df[df["Deposit Name"].isin(selected_deposit_types)]
+                df = df[df["Top 1 Deposit Type"].isin(selected_deposit_types)]
                 # Refilter countries based on deposit type
                 filtered_countries = df["Country"].unique()
                 country_options = [

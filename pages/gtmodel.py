@@ -8,8 +8,8 @@ from components import stats_card, gt_model_card
 from helpers import sparql_utils
 from models import GradeTonnage
 
-gt = GradeTonnage(commodity="nickel", query_path="./models/sql/gt.sql")
-gt.init(get_sparql_data=sparql_utils.run_minmod_query)
+gt = GradeTonnage(commodity="nickel")
+gt.init()
 
 dash.register_page(__name__)
 
@@ -92,7 +92,7 @@ def update_output(selected_commodity):
     selected_commodity = selected_commodity.split()[0]
     gt.update_commodity(selected_commodity)
     try:
-        gt.init(get_sparql_data=sparql_utils.run_minmod_query)
+        gt.init()
     except:
         return dbc.Alert(
             "No results found or there was an error with the query.",

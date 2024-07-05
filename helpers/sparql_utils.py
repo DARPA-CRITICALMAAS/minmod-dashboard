@@ -18,14 +18,16 @@ def run_sparql_query(query, endpoint="https://minmod.isi.edu/sparql", values=Fal
     """
     # add prefixes
     final_query = f"""PREFIX dcterms: <http://purl.org/dc/terms/>
+    PREFIX dcterms: <http://purl.org/dc/terms/>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    PREFIX : <https://minmod.isi.edu/resource/>
+    PREFIX : <https://minmod.isi.edu/ontology/>
+    PREFIX mnr: <https://minmod.isi.edu/resource/>
     PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     PREFIX owl: <http://www.w3.org/2002/07/owl#>
     PREFIX gkbi: <https://geokb.wikibase.cloud/entity/>
-    PREFIX gkbp: <https://geokb.wikibase.cloud/wiki/Property:>
     PREFIX gkbt: <https://geokb.wikibase.cloud/prop/direct/>
     PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     {query}
     """
     # send query
@@ -93,13 +95,13 @@ def infer_and_convert_types(df, round_flag=False):
 
 if __name__ == "__main__":
     sample_query = """
-    SELECT DISTINCT ?comm (COUNT(DISTINCT ?doc) AS ?doc_count)
-    WHERE {
-        ?mi a :MineralInventory .
-        ?mi :reference/:document ?doc .
-        ?mi :commodity/:name ?comm
-    }
-    GROUP BY ?comm
+    SELECT ?comm (COUNT(DISTINCT ?doc) AS ?doc_count)
+        WHERE {
+            ?mi a :MineralInventory .
+            ?mi :reference/:document ?doc . 
+            ?mi :commodity/:normalized_uri/rdfs:label ?comm .
+        }
+        GROUP BY ?comm
     """
     df = run_sparql_query(query=sample_query, values=True)
     print(df)

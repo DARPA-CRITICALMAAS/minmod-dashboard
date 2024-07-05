@@ -15,8 +15,8 @@ from dash.exceptions import PreventUpdate
 dash.register_page(__name__, path="/")
 
 mineral_inventories = kpis.get_mineral_inventories()
-gm = GeoMineral(commodity="nickel", query_path="./models/sql/min.sql")
-gm.init(get_sparql_data=sparql_utils.run_minmod_query)
+gm = GeoMineral(commodity="nickel")
+gm.init()
 
 
 def render():
@@ -337,7 +337,7 @@ def open_url(clickData):
             (gm.gdf["lat"] == clicked_dict["lat"])
             & (gm.gdf["lon"] == clicked_dict["lon"])
         ]
-        return filtered_df["ms.value"].tolist()[0]
+        return filtered_df["ms"].tolist()[0]
 
 
 @callback(
@@ -377,7 +377,7 @@ def update_ui(n_clicks_theme, selected_commodity, current_icon, _, n_clicks_prev
             return [current_icon, geo_model_card(gm, current_theme)]
         selected_commodity = selected_commodity.split()[0]
         gm.update_commodity(selected_commodity)
-        gm.init(get_sparql_data=sparql_utils.run_minmod_query)
+        gm.init()
         return [current_icon, geo_model_card(gm, current_theme)]
     else:
         raise PreventUpdate

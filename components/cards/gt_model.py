@@ -11,14 +11,14 @@ import plotly.graph_objects as go
 def get_gt_model(gt):
     """A function to generate grade-tonnage plot."""
     # Define color for each unique category in 'dtnorm_labels'
-    unique_labels = gt.df["deposit_name"].unique()
+    unique_labels = gt.df["top1_deposit_type"].unique()
     colors = np.linspace(0, 1, len(unique_labels))
     color_map = {label: color for label, color in zip(unique_labels, colors)}
 
     gt_model = go.Figure()
 
     for d_type in unique_labels:
-        df_filtered = gt.df[gt.df["deposit_name"] == d_type]
+        df_filtered = gt.df[gt.df["top1_deposit_type"] == d_type]
         gt_model.add_trace(
             go.Scatter(
                 x=df_filtered["total_tonnage"],

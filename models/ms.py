@@ -1,60 +1,68 @@
-from string import Template
+import pandas as pd
+from helpers import dataservice_utils
 
 
 class MineralSite:
     """A class for holding the mineral site data"""
 
-    def __init__(self, commodity, query_path):
-        self.commodity = commodity
-        self.query_path = query_path
+    def __init__(self, commodity):
+        self.commodity = commodity.lower()
         self.deposit_types = []
         self.country = []
 
-    def init(self, get_sparql_data):
+    def init(self):
         """Initialize and load data from query path using the function reference"""
-        query = open(self.query_path).read()
-        query = Template(query).substitute(commodity=self.commodity)
-        self.df = get_sparql_data(query, values=True)
+        self.df = pd.DataFrame(
+            dataservice_utils.fetch_api_data(
+                "hyper_mineral_sites/" + self.commodity, ssl_flag=False
+            )
+        )
         self.df = self.clean_df(self.df)
-        self.deposit_types = self.df["Deposit Name"].drop_duplicates().to_list()
+        self.deposit_types = self.df["Top 1 Deposit Type"].drop_duplicates().to_list()
         self.country = self.df["Country"].drop_duplicates().to_list()
 
     def update_commodity(self, selected_commodity):
         """sets new commodity"""
-        self.commodity = selected_commodity
+        self.commodity = selected_commodity.lower()
 
     def clean_df(self, df):
         """A cleaner method to clean the raw data obtained from the SPARQL endpoint"""
-        df.columns = list(map(lambda x: x.split(".value")[0], df.columns))
+        drop_columns = ["group_id", "tot_contained_metal"]
+        df_selected = df.drop(drop_columns, axis=1)
 
-        selected_columns = [
-            "ms",
-            "ms_name",
-            "deposit_name",
-            "total_tonnage_measured",
-            "total_tonnage_indicated",
-            "total_tonnage_inferred",
-            "total_tonnage",
-            "total_grade",
-            "country",
-            "loc_wkt",
-        ]
+        # rename columns
+        col_names = {
+            "ms": "Mineral Site URI",
+            "ms_name": "Mineral Site Name",
+            "ms_type": "Mineral Site Type",
+            "ms_rank": "Mineral Site Rank",
+            "country": "Country",
+            "state_or_province": "State/Province",
+            "loc_crs": "Location CRS",
+            "loc_wkt": "Location WKT",
+            "total_tonnage": "Total Tonnage",
+            "total_grade": "Total Grade",
+            "top1_deposit_type": "Top 1 Deposit Type",
+            "top1_deposit_group": "Top Deposit Group",
+            "top1_deposit_environment": "Top 1 Deposit Environment",
+            "top1_deposit_classification_confidence": "Top 1 Deposit Classification Confidence",
+            "top1_deposit_classification_source": "Top 1 Deposit Classification Confidence",
+        }
 
-        df_selected = df[selected_columns]
-        df_selected.columns = [
-            "Mineral Site URI",
-            "Mineral Site Name",
-            "Deposit Name",
-            "Total Tonnage Measured",
-            "Total Tonnage Indicated ",
-            "Total Tonnage Inferred",
-            "Total Tonnage",
-            "Total Grade",
-            "Country",
-            "Loc Wkt",
-        ]
+        df_selected = df_selected.rename(columns=col_names)
+
+        # clean column ms name
+        def clean_names(ms_name):
+            if isinstance(ms_name, list):
+                return ms_name[0]
+            return ms_name
+
+        df_selected["Mineral Site Name"] = df_selected["Mineral Site Name"].apply(
+            clean_names
+        )
+        print(df_selected)
         df_selected["Mineral Site Name"] = df_selected.apply(
-            lambda row: f"[{row['Mineral Site Name']}]({row['Mineral Site URI']})",
+            lambda row: f"[{row['Mineral Site Name']}]({row['Mineral Site URI'][0]})",
             axis=1,
         )
         df_selected = df_selected.drop(["Mineral Site URI"], axis=1)
