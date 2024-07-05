@@ -19,5 +19,5 @@ ENV NAME World
 EXPOSE 8050
 
 # Run app.py when the container launches
-# CMD ["python", "./app.py", "prod"]
-CMD ["gunicorn", "index:server", "--workers", "3", "-b", "0.0.0.0:8050"]
+CMD ["python", "./app.py", "prod"]
+# CMD ["gunicorn", "index:server", "--workers", "3", "-b", "0.0.0.0:8050"]
