@@ -13,8 +13,10 @@ class MineralSite:
     def init(self):
         """Initialize and load data from query path using the function reference"""
         self.df = pd.DataFrame(
-            dataservice_utils.fetch_api_data(
-                "hyper_mineral_sites/" + self.commodity, ssl_flag=False
+            self.clean_and_fix(
+                dataservice_utils.fetch_api_data(
+                    "dedup_mineral_sites/" + self.commodity, ssl_flag=False
+                )
             )
         )
         self.df = self.clean_df(self.df)
@@ -25,9 +27,51 @@ class MineralSite:
         """sets new commodity"""
         self.commodity = selected_commodity.lower()
 
+    def clean_and_fix(self, raw_data):
+        results = []
+        for data in raw_data:
+            first_site = data["sites"][0]
+            if len(data["deposit_types"]) == 0:
+                continue
+            highest_confidence_deposit = max(
+                data["deposit_types"], key=lambda x: x["confidence"]
+            )
+
+            # Combine the first site and highest confidence deposit into a single dictionary
+            combined_data = {
+                **first_site,
+                **{
+                    "top1_deposit_" + k: v
+                    for k, v in highest_confidence_deposit.items()
+                },
+            }
+
+            # Add additional fields from the main data structure
+            for field in [
+                "commodity",
+                "loc_crs",
+                "loc_wkt",
+                "best_loc_crs",
+                "best_loc_wkt",
+                "total_tonnage",
+                "total_grade",
+                "total_contained_metal",
+            ]:
+                combined_data[field] = data[field]
+
+            results.append(combined_data)
+        return results
+
     def clean_df(self, df):
         """A cleaner method to clean the raw data obtained from the SPARQL endpoint"""
-        drop_columns = ["group_id", "tot_contained_metal"]
+        drop_columns = [
+            "commodity",
+            "loc_crs",
+            "loc_wkt",
+            "best_loc_crs",
+            "best_loc_wkt",
+            "total_contained_metal",
+        ]
         df_selected = df.drop(drop_columns, axis=1)
 
         # rename columns
@@ -42,11 +86,11 @@ class MineralSite:
             "loc_wkt": "Location WKT",
             "total_tonnage": "Total Tonnage",
             "total_grade": "Total Grade",
-            "top1_deposit_type": "Top 1 Deposit Type",
+            "top1_deposit_name": "Top 1 Deposit Type",
             "top1_deposit_group": "Top Deposit Group",
             "top1_deposit_environment": "Top 1 Deposit Environment",
-            "top1_deposit_classification_confidence": "Top 1 Deposit Classification Confidence",
-            "top1_deposit_classification_source": "Top 1 Deposit Classification Confidence",
+            "top1_deposit_confidence": "Top 1 Deposit Classification Confidence",
+            "top1_deposit_source": "Top 1 Deposit Classification Confidence",
         }
 
         df_selected = df_selected.rename(columns=col_names)
