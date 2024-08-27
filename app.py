@@ -157,11 +157,17 @@ footer_layout = html.Footer(
             fluid=True,
             style={
                 "backgroundColor": "#212121",
-                "padding": "20px",
+                "padding": "10px",
                 "font-family": "Roboto, sans-serif;",
             },
         )
-    ]
+    ],
+    style={
+        "position": "relative",
+        "width": "100%",
+        "bottom": "0",
+        "backgroundColor": "#212121",
+    },
 )
 
 app.index_string = """
@@ -173,9 +179,9 @@ app.index_string = """
         <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
         {%css%}
     </head>
-    <body>
+    <body style="display: flex; flex-direction: column; min-height: 100vh;">
         {%app_entry%}
-        <footer>
+        <footer style="margin-top: auto;">
             {%config%}
             {%scripts%}
             {%renderer%}
@@ -184,8 +190,9 @@ app.index_string = """
 </html>
 """
 
-app.layout = dash.html.Div(
-    [
+app.layout = html.Div(
+    style={"display": "flex", "flexDirection": "column", "minHeight": "100vh"},
+    children=[
         header_layout,
         html.Hr(
             style={"margin": "0px"},
@@ -234,11 +241,13 @@ app.layout = dash.html.Div(
                 style={"margin-left": "10px"},
             )
         ),
-        dash.html.Hr(
+        html.Hr(
             style={"margin": "0px"},
         ),
-        dash.page_container,
-        html.Br(),
+        html.Div(
+            dash.page_container,
+            style={"flex": "1", "margin-bottom": "20px"},
+        ),
         footer_layout,
     ],
 )
