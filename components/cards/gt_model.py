@@ -68,6 +68,7 @@ def gt_model_card(gt):
                         "displayModeBar": True,
                         "displaylogo": False,
                         "responsive": True,
+                        "showTips": True,
                     },
                 )
             ]
