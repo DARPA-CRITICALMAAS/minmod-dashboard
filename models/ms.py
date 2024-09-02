@@ -104,9 +104,9 @@ class MineralSite:
         df_selected["Mineral Site Name"] = df_selected["Mineral Site Name"].apply(
             clean_names
         )
-        print(df_selected)
+
         df_selected["Mineral Site Name"] = df_selected.apply(
-            lambda row: f"[{row['Mineral Site Name']}]({row['Mineral Site URI'][0]})",
+            lambda row: f"[{row['Mineral Site Name']}]({row['Mineral Site URI']})",
             axis=1,
         )
         df_selected = df_selected.drop(["Mineral Site URI"], axis=1)
