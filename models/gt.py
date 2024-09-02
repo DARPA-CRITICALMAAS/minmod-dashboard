@@ -59,6 +59,12 @@ class GradeTonnage:
             ]:
                 combined_data[field] = data[field]
 
+            # Setting Unkown Deposit Types
+            if not combined_data.get("total_tonnage") or not combined_data.get(
+                "total_grade"
+            ):
+                combined_data["top1_deposit_name"] = "Unknown"
+
             results.append(combined_data)
         return results
 

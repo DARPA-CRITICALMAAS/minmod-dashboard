@@ -223,14 +223,6 @@ app.layout = html.Div(
                     ),
                     dbc.NavItem(
                         dbc.NavLink(
-                            "Data Browser",
-                            external_link=True,
-                            active=True,
-                            href="https://minmod.isi.edu/resource",
-                        )
-                    ),
-                    dbc.NavItem(
-                        dbc.NavLink(
                             "Advanced Search",
                             external_link=True,
                             active=True,
