@@ -131,7 +131,6 @@ def update_dashboard(
         try:
             ms.init()
             df = ms.df
-            print(df)
             # Update deposit type options based on the selected commodity
             deposit_options = [{"label": dt, "value": dt} for dt in ms.deposit_types]
 

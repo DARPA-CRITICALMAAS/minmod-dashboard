@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 def get_gt_model(gt):
     """A function to generate grade-tonnage plot."""
     # Define color for each unique category in 'dtnorm_labels'
-    unique_labels = gt.df["top1_deposit_name"].unique()
+    unique_labels = sorted(gt.df["top1_deposit_name"].unique())
     colors = np.linspace(0, 1, len(unique_labels))
     color_map = {label: color for label, color in zip(unique_labels, colors)}
 
@@ -23,7 +23,7 @@ def get_gt_model(gt):
             go.Scatter(
                 x=df_filtered["total_tonnage"],
                 y=df_filtered["total_grade"],
-                mode="markers+text",
+                mode="markers",
                 text=df_filtered[
                     "ms_name_truncated"
                 ],  # Use truncated names for the labels on the plot

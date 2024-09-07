@@ -15,7 +15,7 @@ class MineralSite:
         self.df = pd.DataFrame(
             self.clean_and_fix(
                 dataservice_utils.fetch_api_data(
-                    "dedup_mineral_sites/" + self.commodity, ssl_flag=False
+                    "/dedup_mineral_sites/" + self.commodity, ssl_flag=False
                 )
             )
         )

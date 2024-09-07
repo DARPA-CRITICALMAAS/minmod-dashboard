@@ -2,6 +2,7 @@ import dash_bootstrap_components as dbc
 import dash
 from dash import html
 from flask import Flask
+from constants import SPARQL_ENDPOINT
 import sys
 
 CERT_FILE = "./ssl/minmod_isi_edu_cert.cer"
@@ -60,8 +61,8 @@ footer_layout = html.Footer(
                                     [
                                         "Data from: ",
                                         html.A(
-                                            "https://minmod.isi.edu/sparql",
-                                            href="https://minmod.isi.edu/sparql",
+                                            SPARQL_ENDPOINT,
+                                            href=SPARQL_ENDPOINT,
                                             style={
                                                 "color": "#D3D3D3",
                                                 "fontFamily": "Helvetica Neue, Helvetica, Arial, sans-serif",

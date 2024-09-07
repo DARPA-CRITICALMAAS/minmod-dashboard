@@ -12,7 +12,7 @@ class GeoMineral:
         """Initialize and load data from query path using the function reference"""
         self.df = pd.DataFrame(
             dataservice_utils.fetch_api_data(
-                "mineral_site_location/" + self.commodity, ssl_flag=False
+                "/mineral_site_location/" + self.commodity, ssl_flag=False
             )
         )
 

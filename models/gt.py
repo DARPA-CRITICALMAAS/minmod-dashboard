@@ -15,7 +15,7 @@ class GradeTonnage:
         self.df = pd.DataFrame(
             self.clean_and_fix(
                 dataservice_utils.fetch_api_data(
-                    "dedup_mineral_sites/" + self.commodity, ssl_flag=False
+                    "/dedup_mineral_sites/" + self.commodity, ssl_flag=False
                 )
             )
         )
@@ -70,7 +70,6 @@ class GradeTonnage:
 
     def clean_df(self, df):
         """A cleaner method to clean the raw data obtained from the SPARQL endpoint"""
-        print(df.columns)
         df = df[df["ms_name"].notna()]
 
         text_to_clean = [

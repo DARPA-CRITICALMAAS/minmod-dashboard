@@ -1,11 +1,12 @@
 import requests
 import pandas as pd
 import urllib3
+from constants import SPARQL_ENDPOINT
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-def run_sparql_query(query, endpoint="https://minmod.isi.edu/sparql", values=False):
+def run_sparql_query(query, endpoint=SPARQL_ENDPOINT, values=False):
     """
     This method queries the SPARQL endpoints and returns the results into a pandas
     DataFrame
@@ -60,9 +61,7 @@ def run_minmod_query(query, values=False):
     :param values: Boolean value to toggle values returned from the query
     :return: Pandas Dataframe when values param is set to True
     """
-    return run_sparql_query(
-        query, endpoint="https://minmod.isi.edu/sparql", values=values
-    )
+    return run_sparql_query(query, endpoint=SPARQL_ENDPOINT, values=values)
 
 
 def run_geokb_query(query, values=False):

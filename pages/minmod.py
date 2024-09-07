@@ -14,7 +14,7 @@ from dash.exceptions import PreventUpdate
 
 dash.register_page(__name__, path="/")
 
-mineral_inventories = kpis.get_mineral_inventories()
+mineral_inventories = kpis.get_mineral_inventories_count_by_commodity()
 gm = GeoMineral(commodity="nickel")
 gm.init()
 
@@ -312,7 +312,7 @@ def set_default_commodity(options):
 )
 def update_all_cards(_):
     """A callback to handle the PI chart updates"""
-    mineral_inventories = kpis.get_mineral_inventories()
+    mineral_inventories = kpis.get_mineral_inventories_count_by_commodity()
     return [
         html.Div(
             pie_card(
