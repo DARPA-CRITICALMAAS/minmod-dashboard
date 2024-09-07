@@ -19,15 +19,23 @@ def get_gt_model(gt):
 
     for d_type in unique_labels:
         df_filtered = gt.df[gt.df["top1_deposit_name"] == d_type]
+
+        hover_template = (
+            "<b>MS Name:</b> %{text}<br>"
+            + "<b>Grade:</b> %{y}<br>"
+            + "<b>Tonnage:</b> %{x}<br>"
+            + "<extra></extra>"
+        )
+
         gt_model.add_trace(
             go.Scatter(
                 x=df_filtered["total_tonnage"],
                 y=df_filtered["total_grade"],
                 mode="markers",
                 text=df_filtered[
-                    "ms_name_truncated"
+                    "ms_name"
                 ],  # Use truncated names for the labels on the plot
-                hovertext=df_filtered["ms_name"],  # Use full names for the hover text
+                hovertemplate=hover_template,  # Use full names for the hover text
                 name=d_type,
                 marker=dict(color=color_map[d_type], size=10, symbol="x"),
                 textposition="top center",
