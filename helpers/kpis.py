@@ -11,7 +11,7 @@ def filter_df_critical_minerals(df, key):
     return df[df[key].str.lower().str.contains(pattern, regex=True)]
 
 
-def filter_df_threshold(df, threshold_prct=0.02):
+def filter_df_threshold(df, threshold_prct=0.025):
     df["total"] = df["total"].astype(int)
     total_inv_count = df["total"].sum()
     threshold = threshold_prct * total_inv_count
