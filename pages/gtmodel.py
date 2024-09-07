@@ -109,9 +109,9 @@ def update_output(selected_commodity):
 def open_url(clickData):
     """A callback to open the clicked url on a new tab"""
     if clickData:
-        filtered_df = gt.df[
-            gt.df["ms_name_truncated"] == clickData["points"][0]["text"]
-        ]
+        print("$#$##$")
+        print(clickData)
+        filtered_df = gt.df[gt.df["ms_name"] == clickData["points"][0]["text"]]
         return filtered_df["ms"].tolist()[0]
 
 
