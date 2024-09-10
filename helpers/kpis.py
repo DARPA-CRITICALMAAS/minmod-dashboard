@@ -7,8 +7,7 @@ from constants import CRITICAL_MINERALS
 
 
 def filter_df_critical_minerals(df, key):
-    pattern = "|".join(CRITICAL_MINERALS)
-    return df[df[key].str.lower().str.contains(pattern, regex=True)]
+    return df[df[key].str.lower().isin(CRITICAL_MINERALS)]
 
 
 def filter_df_threshold(df, threshold_prct=0.025):

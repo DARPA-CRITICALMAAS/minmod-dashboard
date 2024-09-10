@@ -37,7 +37,7 @@ def get_gt_model(gt):
                 ],  # Use truncated names for the labels on the plot
                 hovertemplate=hover_template,  # Use full names for the hover text
                 name=d_type,
-                marker=dict(color=color_map[d_type], size=10, symbol="x"),
+                marker=dict(color=color_map[d_type], size=10, symbol="circle"),
                 textposition="top center",
             )
         )
