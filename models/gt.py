@@ -102,4 +102,8 @@ class GradeTonnage:
         df.loc[:, "ms_name_truncated"] = df["ms_name_filtered"].apply(
             lambda x: " ".join(x.split()[:-3]) if len(x.split()) > 3 else x
         )
+
+        # filtering Unkown deposit types
+        df = df[df["top1_deposit_name"] != "Unknown"]
+
         return df
