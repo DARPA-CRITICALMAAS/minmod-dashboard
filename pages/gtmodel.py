@@ -2,10 +2,10 @@ import dash
 from dash import html, callback, clientside_callback, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
-import dash
+import pandas as pd
+import io
 from helpers import kpis
-from components import stats_card, gt_model_card
-from helpers import sparql_utils
+from components import gt_model_card
 from models import GradeTonnage
 
 gt = GradeTonnage(commodity="nickel")
@@ -48,17 +48,46 @@ layout = html.Div(
                                 ),
                                 size="lg",
                                 spinner_style={"width": "4rem", "height": "4rem"},
-                            )
+                            ),
                         ],
                         className="my-2",
                     ),
+                    # Ensure this row containing the button stays below the plot
+                    dbc.Row(
+                        dbc.Col(
+                            dbc.Button(
+                                "Download CSV",
+                                id="download-btn",
+                                color="primary",
+                                className="mt-3",
+                            ),
+                            width="auto",
+                            style={
+                                "text-align": "right",
+                                "margin-top": "20px",  # Ensure space between plot and button
+                            },
+                        ),
+                        justify="end",
+                        className="mt-auto",  # Push button to the bottom of the card
+                    ),
+                    dcc.Download(id="download-csv"),  # Download component
                 ],
+                style={
+                    "display": "flex",
+                    "flex-direction": "column",  # Flexbox to control the layout
+                    "height": "100%",  # Ensure it fills the card
+                },
             ),
-            style={"height": "105vh", "margin": "10px", "margin-top": "30px"},
+            style={
+                "height": "105vh",
+                "margin": "10px",
+                "margin-top": "30px",
+                "display": "flex",
+                "flex-direction": "column",  # Flexbox on the card to stack items vertically
+            },
         ),
         html.Div(id="url", style={"display": "none"}),
-        # Dummy div to satisfy Dash callback requirements
-        html.Div(id="url-div", style={"display": "none"}),
+        html.Div(id="url-div", style={"display": "none"}),  # Dummy div
     ],
 )
 
@@ -125,3 +154,38 @@ clientside_callback(
     Output("url-div", "children"),
     [Input("url", "children")],  # Input is the URL to open
 )
+
+
+# Fixed Callback to generate CSV and trigger download
+@callback(
+    Output("download-csv", "data"),
+    Input(
+        "download-btn", "n_clicks"
+    ),  # Only trigger the callback when the button is clicked
+    prevent_initial_call=True,  # Ensures it doesn't run on page load
+)
+def download_csv(n_clicks):
+    """Callback to generate CSV data for download only when the button is clicked"""
+    if n_clicks:
+        # Fetch the latest selected commodity value
+        selected_commodity = gt.commodity
+
+        # Assuming gt.df is a pandas DataFrame and filtering specific columns
+        df = gt.df[
+            [
+                "ms",
+                "ms_name",
+                "commodity",
+                "top1_deposit_name",
+                "total_tonnage",
+                "total_grade",
+            ]
+        ].copy()
+
+        # Check if the DataFrame has the necessary columns and data
+        if not df.empty:
+            return dcc.send_data_frame(
+                df.to_csv, "gt_data.csv"
+            )  # Correct usage of send_data_frame
+        else:
+            return dbc.Alert("No data available to download.", color="danger")

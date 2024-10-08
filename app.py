@@ -239,7 +239,10 @@ app.layout = html.Div(
         ),
         html.Div(
             dash.page_container,
-            style={"flex": "1", "margin-bottom": "20px"},
+            style={
+                "flex": "1",
+                "margin-bottom": "50px",
+            },
         ),
         footer_layout,
     ],

@@ -44,6 +44,9 @@ def get_gt_model(gt):
             + "<extra></extra>"
         )
 
+        # Get the count of deposits for this type
+        deposit_count = grouped.loc[d_type, "count"]
+
         gt_model.add_trace(
             go.Scatter(
                 x=df_filtered["total_tonnage"],
@@ -53,7 +56,7 @@ def get_gt_model(gt):
                     "ms_name"
                 ],  # Use truncated names for the labels on the plot
                 hovertemplate=hover_template,  # Use full names for the hover text
-                name=d_type,
+                name=f"{d_type} ({deposit_count})",  # Add the count of deposits to the legend name
                 marker=dict(color=color_map[d_type], size=10, symbol="circle"),
                 textposition="top center",
             )
