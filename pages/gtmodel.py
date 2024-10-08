@@ -11,6 +11,8 @@ from models import GradeTonnage
 gt = GradeTonnage(commodity="nickel")
 gt.init()
 
+min_distance, max_distance = 0, 180
+
 dash.register_page(__name__)
 
 layout = html.Div(
@@ -48,6 +50,32 @@ layout = html.Div(
                                 ),
                                 size="lg",
                                 spinner_style={"width": "4rem", "height": "4rem"},
+                            ),
+                            html.Div(
+                                dcc.Slider(
+                                    id="aggregation-slider",
+                                    min=int(min_distance),  # minimum proximity in miles
+                                    max=int(max_distance),  # maximum proximity in miles
+                                    step=20,  # small step size for continuous scrolling
+                                    value=int(
+                                        min_distance
+                                    ),  # default proximity value in miles
+                                    marks={
+                                        i: f"{i} miles"
+                                        for i in range(
+                                            int(min_distance),
+                                            int(max_distance),
+                                            int(int(max_distance - min_distance) / 8),
+                                        )
+                                    },
+                                    tooltip={
+                                        "placement": "bottom",
+                                        "always_visible": True,
+                                    },
+                                ),
+                                style={
+                                    "margin-top": "40px"
+                                },  # Add top margin to the div
                             ),
                         ],
                         className="my-2",
@@ -112,12 +140,17 @@ def set_default_commodity(options):
 
 @callback(
     Output("render-plot", "children"),
-    [Input("commodity-gt", "value")],
+    [
+        Input("commodity-gt", "value"),
+        Input("aggregation-slider", "value"),  # Add slider as input
+    ],
 )
-def update_output(selected_commodity):
-    """A callback to render grade tonnage model based on the commodity selected"""
+def update_output(selected_commodity, proximity_value):
+    """A callback to render grade tonnage model based on the commodity selected and proximity value"""
     if selected_commodity == gt.commodity:
-        return gt_model_card(gt)
+        return gt_model_card(
+            gt, proximity_value=proximity_value
+        )  # Pass proximity value
     selected_commodity = selected_commodity.split()[0]
     gt.update_commodity(selected_commodity)
     try:
@@ -127,7 +160,8 @@ def update_output(selected_commodity):
             "No results found or there was an error with the query.",
             color="danger",
         )
-    return gt_model_card(gt)
+    print(proximity_value)
+    return gt_model_card(gt, proximity_value=proximity_value)  # Pass proximity value
 
 
 @callback(

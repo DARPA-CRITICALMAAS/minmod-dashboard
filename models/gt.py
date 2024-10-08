@@ -52,6 +52,7 @@ class GradeTonnage:
                 "loc_crs",
                 "loc_wkt",
                 "best_loc_crs",
+                "best_loc_centroid_epsg_4326",
                 "best_loc_wkt",
                 "total_tonnage",
                 "total_grade",
