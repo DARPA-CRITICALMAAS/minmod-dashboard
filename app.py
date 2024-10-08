@@ -203,7 +203,23 @@ app.layout = html.Div(
                 [
                     dbc.NavItem(
                         dbc.NavLink(
-                            "Dashboard", external_link=True, active=True, href="/"
+                            "Dashboard",
+                            external_link=True,
+                            active=True,
+                            href="/",
+                            style={
+                                "font-size": "19px",
+                                "white-space": "nowrap",
+                            },
+                        )
+                    ),
+                    dbc.NavItem(
+                        dbc.NavLink(
+                            "Map View",
+                            external_link=True,
+                            active=True,
+                            href="mapview",
+                            style={"font-size": "19px", "white-space": "nowrap"},
                         )
                     ),
                     dbc.NavItem(
@@ -212,6 +228,7 @@ app.layout = html.Div(
                             external_link=True,
                             active=True,
                             href="gtmodel",
+                            style={"font-size": "19px", "white-space": "nowrap"},
                         )
                     ),
                     dbc.NavItem(
@@ -220,6 +237,7 @@ app.layout = html.Div(
                             external_link=True,
                             active=True,
                             href="mineralsite",
+                            style={"font-size": "19px", "white-space": "nowrap"},
                         )
                     ),
                     dbc.NavItem(
@@ -228,6 +246,7 @@ app.layout = html.Div(
                             external_link=True,
                             active=True,
                             href="sparqlsearch",
+                            style={"font-size": "19px", "white-space": "nowrap"},
                         )
                     ),
                 ],
@@ -241,7 +260,7 @@ app.layout = html.Div(
             dash.page_container,
             style={
                 "flex": "1",
-                "margin-bottom": "50px",
+                "margin-bottom": "40px",
             },
         ),
         footer_layout,
