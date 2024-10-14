@@ -1,123 +1,95 @@
-from helpers import sparql_utils
 import numpy as np
+import pandas as pd
+
+from helpers import dataservice_utils
+
+from constants import CRITICAL_MINERALS
 
 
-def get_mineral_inventories():
+def filter_df_critical_minerals(df, key):
+    return df[df[key].str.lower().isin(CRITICAL_MINERALS)]
+
+
+def filter_df_threshold(df, threshold_prct=0.025):
+    df["total"] = df["total"].astype(int)
+    total_inv_count = df["total"].sum()
+    threshold = threshold_prct * total_inv_count
+    df["comm_updated"] = np.where(
+        df["total"] < threshold, "others", df["commodity_label"]
+    )
+    df = df.groupby("comm_updated")["total"].sum().reset_index()
+    return df
+
+
+def get_mineral_inventories_count_by_commodity():
     """a helper function to fetch mineral inventories from SPARQL endpoint"""
 
-    query = """
-        SELECT DISTINCT ?comm (COUNT(DISTINCT ?mi) AS ?inv_count)
-            WHERE {
-                ?mi a :MineralInventory .
-                ?mi :commodity/:name ?comm .
-                ?mi :ore ?ore .
-            }
-            GROUP BY ?comm
-    """
-    df = sparql_utils.run_sparql_query(query)
+    df = pd.DataFrame(
+        dataservice_utils.fetch_api_data(
+            "/mineral-inventories/count-by-commodity", ssl_flag=False
+        )
+    )
+    df = filter_df_critical_minerals(df=df, key="commodity_label")
+    df = filter_df_threshold(df)
     return {
-        "labels": df["comm.value"].to_list(),
-        "values": df["inv_count.value"].to_list(),
+        "labels": df["comm_updated"].to_list(),
+        "values": df["total"].to_list(),
     }
-
-
-def get_mineral_site_count():
-    """a helper function to fetch mineral site count from SPARQL endpoint"""
-    query = """
-        SELECT (COUNT(DISTINCT ?ms) AS ?site_count)
-            WHERE {
-                ?ms a :MineralSite .
-                ?ms :mineral_inventory ?mi .
-                ?mi :commodity/:name ?comm .
-                ?mi :ore ?ore .
-            }
-    """
-    df = sparql_utils.run_sparql_query(query)
-    return int(df["site_count.value"].to_list()[0])
 
 
 def get_mineral_site_count_per_commodity():
     """a helper function to fetch mineral site count from SPARQL endpoint"""
-    query = """
-        SELECT ?comm (COUNT(DISTINCT ?ms) AS ?site_count)
-            WHERE {
-                ?ms a :MineralSite .
-                ?ms :mineral_inventory ?mi .
-                ?mi :commodity/:name ?comm .
-                ?mi :ore ?ore .
-            }
-            GROUP BY ?comm
-    """
-    df = sparql_utils.run_sparql_query(query)
+    df = pd.DataFrame(
+        dataservice_utils.fetch_api_data(
+            "/mineral-sites/count-by-commodity", ssl_flag=False
+        )
+    )
+    df = filter_df_critical_minerals(df=df, key="commodity_label")
+    df = filter_df_threshold(df)
     return {
-        "labels": df["comm.value"].to_list(),
-        "values": df["site_count.value"].to_list(),
+        "labels": df["comm_updated"].to_list(),
+        "values": df["total"].to_list(),
     }
 
 
 def get_docs_per_commodity():
     """a helper function to fetch mineral site count from SPARQL endpoint"""
-    query = """
-        SELECT ?comm (COUNT(DISTINCT ?doc) AS ?doc_count)
-            WHERE {
-                ?mi :reference/:document ?doc .
-                ?mi :commodity/:name ?comm .
-                ?mi :ore ?ore .
-            }
-            GROUP BY ?comm
-    """
-    df = sparql_utils.run_sparql_query(query)
-    # df["doc_count.value"] = df["doc_count.value"].astype(int)
-    # df["comm_updated"] = np.where(df["doc_count.value"] < 4, "others", df["comm.value"])
-    # df = df.groupby("comm_updated")["doc_count.value"].sum().reset_index()
+    df = pd.DataFrame(
+        dataservice_utils.fetch_api_data(
+            "/documents/count-by-commodity", ssl_flag=False
+        )
+    )
+    df = filter_df_critical_minerals(df=df, key="commodity_label")
+    df = filter_df_threshold(df)
     return {
-        "labels": df["comm.value"].to_list(),
-        "values": df["doc_count.value"].to_list(),
+        "labels": df["comm_updated"].to_list(),
+        "values": df["total"].to_list(),
     }
 
 
 def get_documents_count():
-    """a helper function to fetch the documents count from SPARQL endpoit"""
-    query = """
-        SELECT (COUNT(DISTINCT ?doc) AS ?doc_count)
-            WHERE {
-                ?mi :reference/:document ?doc .
-            }
-    """
-    df = sparql_utils.run_sparql_query(query)
-    return int(df["doc_count.value"].to_list()[0])
+    df = dataservice_utils.fetch_api_data("/documents/count", ssl_flag=False)
+    return df["total"]
 
 
 def get_inventory_count():
-    """a helper function to fetch the documents count from SPARQL endpoit"""
-    query = """
-        SELECT (COUNT(DISTINCT ?mi) AS ?inv_count)
-            WHERE {
-                ?mi a :MineralInventory .
-                ?mi :commodity/:name ?comm .
-                ?mi :ore ?ore .
-            }
-    """
-    df = sparql_utils.run_sparql_query(query)
-    return int(df["inv_count.value"].to_list()[0])
+    """a helper function to fetch the inventory count from SPARQL endpoit"""
+    df = dataservice_utils.fetch_api_data("/mineral-inventories/count", ssl_flag=False)
+    return df["total"]
+
+
+def get_mineral_site_count():
+    """a helper function to fetch mineral site count from SPARQL endpoint"""
+    df = dataservice_utils.fetch_api_data("/mineral-sites/count", ssl_flag=False)
+    return df["total"]
 
 
 def get_commodities():
     """a helper function to fetch commodities from SPARQL endpoint"""
-
-    query = """
-        SELECT DISTINCT ?commodity 
-            WHERE {
-                ?s :mineral_inventory ?o_inv .
-                ?o_inv :category ?cat .
-                ?o_inv :commodity [ :name ?commodity ] .
-                ?o_inv :ore [ :ore_value ?ore ] .
-                ?o_inv :grade [ :grade_value ?grade ] .
-            }
-    """
-    df = sparql_utils.run_sparql_query(query)
-    return df["commodity.value"].to_list()
+    df = pd.DataFrame(dataservice_utils.fetch_api_data("/commodities", ssl_flag=False))
+    df = filter_df_critical_minerals(df=df, key="name")
+    return df["name"].to_list()
 
 
 if __name__ == "__main__":
-    print(get_mineral_inventories())
+    print(get_mineral_inventories_count_by_commodity())

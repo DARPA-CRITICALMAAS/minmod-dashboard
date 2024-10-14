@@ -20,10 +20,7 @@ def safe_wkt_load(wkt_str):
 def get_geo_model(gm, theme):
     """a function to get a scatter mapbox plot"""
     # Cleaning wkt points
-    gm.df["loc_wkt.value"] = gm.df["loc_wkt.value"].apply(
-        lambda x: x.replace(",", " ") if x.startswith("POINT") else x
-    )
-    gm.df["geometry"] = gm.df["loc_wkt.value"].apply(safe_wkt_load)
+    gm.df["geometry"] = gm.df["best_loc_centroid_epsg_4326"].apply(safe_wkt_load)
     gdf = gpd.GeoDataFrame(gm.df, geometry="geometry", crs="epsg:4326")
     gdf = gdf.dropna(subset=["geometry"])
 
@@ -48,12 +45,24 @@ def get_geo_model(gm, theme):
         gdf,
         lat="lat",
         lon="lon",
-        hover_name="name.value",
+        hover_name="ms_name",
         zoom=2,
         color_discrete_sequence=["red"],
         size_max=30,
         height=900,
     )
+
+    geo_model.update_traces(
+        hovertemplate=(
+            "<b>MS Name:</b> %{hovertext}<br>"
+            + "<b>Latitude:</b> %{lat}<br>"
+            + "<b>Longitude:</b> %{lon}<br>"
+            + "<extra></extra>"
+        )
+    )
+
+    # Set the hovertext to be the "ms_name"
+    geo_model.update_traces(hovertext=gdf["ms_name"])
 
     # Setting Map Style and toggle based on theme
     if theme == "light":

@@ -34,7 +34,7 @@ Install [docker](https://docs.docker.com/engine/installation/) and run:
 
 ```shell
 docker build -t dash-app .
-docker run -p 8050:8050 dash-app
+docker run -v /var/local/mindmod/ssl/:/usr/src/app/ssl/ -d -p 8050:8050 dash-app
 ```
 
 Otherwise, for the standalone web service:
