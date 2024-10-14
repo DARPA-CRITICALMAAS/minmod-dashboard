@@ -11,7 +11,7 @@ from models import GradeTonnage
 gt = GradeTonnage(commodity="nickel")
 gt.init()
 
-min_distance, max_distance = 0, 180
+min_distance, max_distance = 0, 200
 
 dash.register_page(__name__)
 
@@ -52,30 +52,32 @@ layout = html.Div(
                                 spinner_style={"width": "4rem", "height": "4rem"},
                             ),
                             html.Div(
-                                dcc.Slider(
-                                    id="aggregation-slider",
-                                    min=int(min_distance),  # minimum proximity in miles
-                                    max=int(max_distance),  # maximum proximity in miles
-                                    step=20,  # small step size for continuous scrolling
-                                    value=int(
-                                        min_distance
-                                    ),  # default proximity value in miles
-                                    marks={
-                                        i: f"{i} miles"
-                                        for i in range(
-                                            int(min_distance),
-                                            int(max_distance),
-                                            int(int(max_distance - min_distance) / 8),
-                                        )
-                                    },
-                                    tooltip={
-                                        "placement": "bottom",
-                                        "always_visible": True,
-                                    },
-                                ),
+                                children=[
+                                    dcc.Slider(
+                                        id="aggregation-slider",
+                                        min=int(
+                                            min_distance
+                                        ),  # minimum proximity in miles
+                                        max=int(
+                                            max_distance
+                                        ),  # maximum proximity in miles
+                                        step=1,  # small step size for continuous scrolling
+                                        value=int(
+                                            min_distance
+                                        ),  # default proximity value in miles
+                                        marks=None,
+                                        tooltip={
+                                            "placement": "bottom",
+                                            "always_visible": True,
+                                            "template": "{value} miles",
+                                        },
+                                    )
+                                ],
                                 style={
-                                    "margin-top": "40px"
-                                },  # Add top margin to the div
+                                    "width": "50%",  # Width of the div containing the slider
+                                    "margin": "auto",  # Center the slider horizontally
+                                    "padding": "40px 0",  # Add padding at the top and bottom
+                                },
                             ),
                         ],
                         className="my-2",
