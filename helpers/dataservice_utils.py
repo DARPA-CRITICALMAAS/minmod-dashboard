@@ -2,7 +2,7 @@ import requests
 from constants import API_ENDPOINT
 
 
-def fetch_api_data(path, ssl_flag):
+def fetch_api_data(path, ssl_flag, params=None):
     """
     Fetches and returns data from the API
 
@@ -11,7 +11,7 @@ def fetch_api_data(path, ssl_flag):
     :return: dict - Parsed JSON data from the API
     """
     try:
-        response = requests.get(API_ENDPOINT + path, verify=ssl_flag)
+        response = requests.get(API_ENDPOINT + path, params=params, verify=ssl_flag)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx and 5xx)
         return response.json()  # Parse and return JSON response
     except requests.exceptions.HTTPError as http_err:

@@ -3,10 +3,9 @@ import pandas as pd
 
 from helpers import dataservice_utils
 
-from constants import CRITICAL_MINERALS
-
 
 def filter_df_critical_minerals(df, key):
+    CRITICAL_MINERALS = {commodity.lower() for commodity in get_commodities()}
     return df[df[key].str.lower().isin(CRITICAL_MINERALS)]
 
 
@@ -86,8 +85,11 @@ def get_mineral_site_count():
 
 def get_commodities():
     """a helper function to fetch commodities from SPARQL endpoint"""
-    df = pd.DataFrame(dataservice_utils.fetch_api_data("/commodities", ssl_flag=False))
-    df = filter_df_critical_minerals(df=df, key="name")
+    df = pd.DataFrame(
+        dataservice_utils.fetch_api_data(
+            "/commodities", ssl_flag=False, params={"is_critical": True}
+        )
+    )
     return df["name"].to_list()
 
 
