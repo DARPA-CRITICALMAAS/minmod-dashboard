@@ -3,7 +3,6 @@ from dash import html, callback, clientside_callback, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import pandas as pd
-import io
 from helpers import kpis
 from components import gt_model_card
 from models import GradeTonnage
@@ -16,7 +15,12 @@ min_distance, max_distance = 0, 200
 dash.register_page(__name__)
 
 layout = html.Div(
-    [
+    style={
+        "display": "flex",
+        "flexDirection": "column",
+        "minHeight": "100vh",
+    },  # Flexbox to ensure proper layout
+    children=[
         dcc.Location(id="url-gt", refresh=True),
         dbc.Card(
             dbc.CardBody(
@@ -51,65 +55,76 @@ layout = html.Div(
                                 size="lg",
                                 spinner_style={"width": "4rem", "height": "4rem"},
                             ),
-                            html.Div(
-                                children=[
-                                    dcc.Slider(
-                                        id="aggregation-slider",
-                                        min=int(
-                                            min_distance
-                                        ),  # minimum proximity in miles
-                                        max=int(
-                                            max_distance
-                                        ),  # maximum proximity in miles
-                                        step=1,  # small step size for continuous scrolling
-                                        value=int(
-                                            min_distance
-                                        ),  # default proximity value in miles
-                                        marks=None,
-                                        tooltip={
-                                            "placement": "bottom",
-                                            "always_visible": True,
-                                            "template": "{value} miles",
-                                        },
-                                    )
-                                ],
-                                style={
-                                    "width": "50%",  # Width of the div containing the slider
-                                    "margin": "auto",  # Center the slider horizontally
-                                    "padding": "40px 0",  # Add padding at the top and bottom
-                                },
-                            ),
                         ],
                         className="my-2",
                     ),
-                    # Ensure this row containing the button stays below the plot
+                    # Row containing the slider with label above it and the download button on the right
                     dbc.Row(
-                        dbc.Col(
-                            dbc.Button(
-                                "Download CSV",
-                                id="download-btn",
-                                color="primary",
-                                className="mt-3",
+                        [
+                            dbc.Col(
+                                html.Div(
+                                    [
+                                        html.P(
+                                            "Geo Spatial Aggregation (Miles)",  # Text above slider
+                                            style={
+                                                "font-family": '"Open Sans", verdana, arial, sans-serif',
+                                                "font-size": "20px",
+                                                "text-align": "center",
+                                                "font-weight": "bold",
+                                            },
+                                        ),
+                                        dcc.Slider(
+                                            id="aggregation-slider",
+                                            min=int(min_distance),
+                                            max=int(max_distance),
+                                            step=1,
+                                            value=int(
+                                                min_distance
+                                            ),  # Set default value to 0 (min_distance)
+                                            marks=None,
+                                            tooltip={
+                                                "placement": "bottom",
+                                                "always_visible": True,
+                                                "template": "{value} miles",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "text-align": "center",  # Centering the label and slider
+                                    },
+                                ),
+                                width=6,  # Width of the slider column
+                                style={
+                                    "padding": "40px 0",  # Padding at the top and bottom
+                                    "margin": "auto",  # Center the slider and label
+                                },
                             ),
-                            width="auto",
-                            style={
-                                "text-align": "right",
-                                "margin-top": "20px",  # Ensure space between plot and button
-                            },
-                        ),
-                        justify="end",
-                        className="mt-auto",  # Push button to the bottom of the card
+                            dbc.Col(
+                                dbc.Button(
+                                    "Download CSV",
+                                    id="download-btn",
+                                    color="primary",
+                                    className="mt-3",
+                                ),
+                                width="auto",
+                                style={
+                                    "text-align": "right",  # Align button to the right
+                                    "padding-top": "20px",
+                                },
+                                className="d-flex justify-content-end",  # Ensures it sticks to the right
+                            ),
+                        ],
+                        className="my-3 d-flex justify-content-between align-items-center",  # Ensures alignment and spacing
                     ),
                     dcc.Download(id="download-csv"),  # Download component
                 ],
                 style={
                     "display": "flex",
                     "flex-direction": "column",  # Flexbox to control the layout
-                    "height": "100%",  # Ensure it fills the card
+                    "height": "auto",  # Let the card take its natural height
                 },
             ),
             style={
-                "height": "105vh",
                 "margin": "10px",
                 "margin-top": "30px",
                 "display": "flex",
@@ -141,6 +156,16 @@ def set_default_commodity(options):
 
 
 @callback(
+    Output(
+        "aggregation-slider", "value"
+    ),  # Reset slider value to 0 on commodity change
+    Input("commodity-gt", "value"),
+)
+def reset_slider_on_commodity_change(selected_commodity):
+    return 0  # Reset slider to 0 whenever a new commodity is selected
+
+
+@callback(
     Output("render-plot", "children"),
     [
         Input("commodity-gt", "value"),
@@ -162,7 +187,6 @@ def update_output(selected_commodity, proximity_value):
             "No results found or there was an error with the query.",
             color="danger",
         )
-    print(proximity_value)
     return gt_model_card(gt, proximity_value=proximity_value)  # Pass proximity value
 
 
