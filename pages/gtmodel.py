@@ -132,14 +132,15 @@ def update_output(selected_commodity):
 
 @callback(
     Output("url", "children"),
-    [Input("clickable-plot", "clickData")],
+    Output("clickable-plot", "clickData"),
+    Input("clickable-plot", "clickData"),
     prevent_initial_call=True,
 )
 def open_url(clickData):
     """A callback to open the clicked url on a new tab"""
     if clickData:
         filtered_df = gt.df[gt.df["ms_name"] == clickData["points"][0]["text"]]
-        return filtered_df["ms"].tolist()[0]
+        return filtered_df["ms"].tolist()[0], None
 
 
 # Clientside function to open a new tab
