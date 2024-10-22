@@ -6,42 +6,6 @@ from dash import dcc
 
 import numpy as np
 import plotly.graph_objects as go
-from math import radians, sin, cos, sqrt, atan2
-
-# Earth radius in miles
-EARTH_RADIUS = 3959.0  # in miles
-
-
-# Haversine distance function to calculate distance in miles
-def haversine(lat1, lon1, lat2, lon2):
-    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-
-    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-    return EARTH_RADIUS * c  # Returns distance in miles
-
-
-# Caching approach: Precompute all pairwise distances and store them
-def compute_all_distances(df):
-    distances = {}
-    num_points = len(df)
-
-    # Compare each point with every other point and store distances
-    for i in range(num_points):
-        for j in range(i + 1, num_points):
-            distance = haversine(
-                df.iloc[i]["lat"],
-                df.iloc[i]["lng"],
-                df.iloc[j]["lat"],
-                df.iloc[j]["lng"],
-            )
-            distances[(i, j)] = distance
-            distances[(j, i)] = distance  # Symmetric distances
-
-    return distances
 
 
 def extract_lat_lng(wkt_point):
@@ -116,14 +80,6 @@ def get_gt_model(gt, proxmity_value=0):
         gt.df["total_contained_metal"] / gt.df["total_tonnage"]
     )
 
-    # Apply the function to the 'best_loc_wkt' column and assign the results to 'lat' and 'lng' columns in the same DataFrame
-    gt.df[["lat", "lng"]] = gt.df["best_loc_centroid_epsg_4326"].apply(
-        lambda x: pd.Series(extract_lat_lng(x))
-    )
-
-    # Compute all distances once and store them in a cache
-    distances_cache = compute_all_distances(gt.df)
-
     grouped = (
         gt.df.groupby("top1_deposit_name")
         .agg({"top1_deposit_name": "count", "avg_metal_per_tonnage": "mean"})
@@ -144,9 +100,11 @@ def get_gt_model(gt, proxmity_value=0):
     for d_type in unique_labels:
         df_filtered = gt.df[gt.df["top1_deposit_name"] == d_type]
 
-        aggregated_df = greedy_weighted_avg_aggregation(
-            df_filtered, distances_cache, proxmity_value
-        )
+        aggregated_df = df_filtered
+        if proxmity_value != 0:
+            aggregated_df = greedy_weighted_avg_aggregation(
+                df_filtered, gt.distance_caches, proxmity_value
+            )
 
         hover_template = (
             "<b>MS Name:</b> %{text}<br>"

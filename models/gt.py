@@ -1,5 +1,12 @@
 import pandas as pd
 from helpers import dataservice_utils
+from math import radians, sin, cos, sqrt, atan2
+from functools import lru_cache
+import numpy as np
+
+
+# Earth radius in miles
+EARTH_RADIUS = 3959.0  # in miles
 
 
 class GradeTonnage:
@@ -9,6 +16,7 @@ class GradeTonnage:
         self.commodity = commodity.lower()
         self.deposit_types = []
         self.country = []
+        self.distance_caches = {}
 
     def init(self):
         """Initialize and load data from query path using the function reference"""
@@ -22,6 +30,12 @@ class GradeTonnage:
         self.df = self.clean_df(self.df)
         self.deposit_types = self.df["top1_deposit_name"].drop_duplicates().to_list()
         self.country = self.df["country"].to_list()
+
+        # Apply the function to the 'best_loc_wkt' column and assign the results to 'lat' and 'lng' columns in the same DataFrame
+        self.df[["lat", "lng"]] = self.df["best_loc_centroid_epsg_4326"].apply(
+            lambda x: pd.Series(self.extract_lat_lng(x))
+        )
+        self.distance_caches = self.compute_all_distances(self.commodity)
 
     def update_commodity(self, selected_commodity):
         """sets new commodity"""
@@ -108,3 +122,42 @@ class GradeTonnage:
         df = df[df["top1_deposit_name"] != "Unknown"]
 
         return df
+
+    # Haversine distance function to calculate distance in miles
+    def haversine(self, lat1, lon1, lat2, lon2):
+        lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        return EARTH_RADIUS * c  # Returns distance in miles
+
+    # Caching approach: Precompute all pairwise distances and store them
+    @lru_cache(maxsize=10)
+    def compute_all_distances(self, commodity):
+        distances = {}
+        num_points = len(self.df)
+
+        # Compare each point with every other point and store distances
+        for i in range(num_points):
+            for j in range(i + 1, num_points):
+                distance = self.haversine(
+                    self.df.iloc[i]["lat"],
+                    self.df.iloc[i]["lng"],
+                    self.df.iloc[j]["lat"],
+                    self.df.iloc[j]["lng"],
+                )
+                distances[(i, j)] = distance
+                distances[(j, i)] = distance  # Symmetric distances
+
+        return distances
+
+    def extract_lat_lng(self, wkt_point):
+        if pd.isnull(wkt_point):
+            return pd.Series([np.nan, np.nan])  # Return NaN if the value is null
+        # Remove 'POINT(' and ')' and split by space
+        wkt_point = wkt_point.replace("POINT (", "").replace(")", "")
+        lon, lat = map(float, wkt_point.split())
+        return pd.Series([lat, lon])
