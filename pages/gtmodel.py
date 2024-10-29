@@ -1,13 +1,13 @@
 import dash
 from dash import html, callback, clientside_callback, dcc
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import pandas as pd
 from helpers import kpis
 from components import gt_model_card
 from models import GradeTonnage
 
-gt = GradeTonnage(commodity="nickel")
+gt = GradeTonnage(commodity="aluminum")
 gt.init()
 
 min_distance, max_distance = 0, 200
@@ -77,7 +77,7 @@ layout = html.Div(
                                             id="aggregation-slider",
                                             min=int(min_distance),
                                             max=int(max_distance),
-                                            step=1,
+                                            step=10,
                                             value=int(
                                                 min_distance
                                             ),  # Set default value to 0 (min_distance)
@@ -170,16 +170,26 @@ def reset_slider_on_commodity_change(selected_commodity):
     [
         Input("commodity-gt", "value"),
         Input("aggregation-slider", "value"),  # Add slider as input
+        State("clickable-plot", "figure"),
     ],
 )
-def update_output(selected_commodity, proximity_value):
+def update_output(selected_commodity, proximity_value, figure):
     """A callback to render grade tonnage model based on the commodity selected and proximity value"""
-    if selected_commodity == gt.commodity:
-        return gt_model_card(
-            gt, proximity_value=proximity_value
-        )  # Pass proximity value
+
     selected_commodity = selected_commodity.split()[0]
-    gt.update_commodity(selected_commodity)
+
+    if selected_commodity.lower() == gt.commodity:
+        visible_traces = [
+            " ".join(trace["name"].split()[:-1])
+            for trace in figure["data"]
+            if "hovertemplate" in trace and trace.get("visible", True) == True
+        ]
+        gt.visible_traces = visible_traces
+    else:
+        gt.update_commodity(selected_commodity)
+
+    gt.update_proximity(proximity_value)
+
     try:
         gt.init()
     except:
@@ -187,6 +197,7 @@ def update_output(selected_commodity, proximity_value):
             "No results found or there was an error with the query.",
             color="danger",
         )
+
     return gt_model_card(gt, proximity_value=proximity_value)  # Pass proximity value
 
 
@@ -222,9 +233,10 @@ clientside_callback(
     Input(
         "download-btn", "n_clicks"
     ),  # Only trigger the callback when the button is clicked
+    State("clickable-plot", "figure"),
     prevent_initial_call=True,  # Ensures it doesn't run on page load
 )
-def download_csv(n_clicks):
+def download_csv(n_clicks, figure):
     """Callback to generate CSV data for download only when the button is clicked"""
     if n_clicks:
         # Fetch the latest selected commodity value
@@ -241,6 +253,13 @@ def download_csv(n_clicks):
                 "total_grade",
             ]
         ].copy()
+
+        visible_traces = [
+            " ".join(trace["name"].split()[:-1])
+            for trace in figure["data"]
+            if "hovertemplate" in trace and trace.get("visible", True) == True
+        ]
+        df = df[df["top1_deposit_name"].isin(visible_traces)]
 
         # Check if the DataFrame has the necessary columns and data
         if not df.empty:

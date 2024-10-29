@@ -128,6 +128,7 @@ def get_gt_model(gt, proxmity_value=0):
                 name=f"{d_type} ({deposit_count})",  # Add the count of deposits to the legend name
                 marker=dict(color=color_map[d_type], size=10, symbol="circle"),
                 textposition="top center",
+                visible=True,
             )
         )
 
@@ -177,6 +178,15 @@ def get_gt_model(gt, proxmity_value=0):
         template="plotly_white",
         dragmode="pan",
     )
+
+    if len(gt.visible_traces) > 0:
+        for trace in gt_model["data"]:
+            if trace.hovertemplate:
+                trace_name = " ".join(trace["name"].split()[:-1])
+                if trace_name in gt.visible_traces:
+                    trace.visible = True
+                else:
+                    trace.visible = "legendonly"
 
     return gt_model
 

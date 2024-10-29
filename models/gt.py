@@ -3,6 +3,46 @@ from helpers import dataservice_utils
 from math import radians, sin, cos, sqrt, atan2
 from functools import lru_cache
 import numpy as np
+import time
+from datetime import datetime, timedelta
+
+# Define a constant date range (e.g., 30 days)
+CACHE_DURATION_DAYS = 3
+
+# Cache storage for the last-used timestamps
+cache_access_times = {}
+
+
+# Decorator to create a cache with a time-based expiration
+def lru_cache_with_date_range(maxsize=128):
+    def decorator(func):
+        # LRU Cache
+        @lru_cache(maxsize=maxsize)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        # Function to check and clear outdated cache entries
+        def clear_expired_cache():
+            current_time = datetime.now()
+            for key in list(cache_access_times.keys()):
+                if current_time - cache_access_times[key] > timedelta(
+                    days=CACHE_DURATION_DAYS
+                ):
+                    wrapper.cache_clear()  # Clear the entire cache if one entry is too old
+                    break  # You can modify this to clear only the expired keys if needed
+
+        # Wrap the original function to track access times
+        def cached_func(*args, **kwargs):
+            clear_expired_cache()  # Check and clear expired cache before any function call
+            result = wrapper(*args, **kwargs)
+            cache_access_times[args] = (
+                datetime.now()
+            )  # Track when the cache was last used
+            return result
+
+        return cached_func
+
+    return decorator
 
 
 # Earth radius in miles
@@ -17,6 +57,8 @@ class GradeTonnage:
         self.deposit_types = []
         self.country = []
         self.distance_caches = {}
+        self.proximity_value = 0
+        self.visible_traces = []
 
     def init(self):
         """Initialize and load data from query path using the function reference"""
@@ -35,11 +77,17 @@ class GradeTonnage:
         self.df[["lat", "lng"]] = self.df["best_loc_centroid_epsg_4326"].apply(
             lambda x: pd.Series(self.extract_lat_lng(x))
         )
-        self.distance_caches = self.compute_all_distances(self.commodity)
+        if self.proximity_value != 0:
+            self.distance_caches = self.compute_all_distances(self.commodity)
 
     def update_commodity(self, selected_commodity):
         """sets new commodity"""
         self.commodity = selected_commodity.lower()
+        self.visible_traces = []
+
+    def update_proximity(self, proximity_value):
+        """sets new proximity"""
+        self.proximity_value = proximity_value
 
     def clean_and_fix(self, raw_data):
         results = []
@@ -135,7 +183,7 @@ class GradeTonnage:
         return EARTH_RADIUS * c  # Returns distance in miles
 
     # Caching approach: Precompute all pairwise distances and store them
-    @lru_cache(maxsize=10)
+    @lru_cache_with_date_range(maxsize=10)
     def compute_all_distances(self, commodity):
         distances = {}
         num_points = len(self.df)

@@ -10,3 +10,8 @@
 #aggregation-slider .rc-slider-handle {
     border: solid 2px #4582ec;
 }
+
+#aggregation-slider .rc-slider-tooltip-inner {
+    height: 35px;
+    font-size: 25px;
+}
