@@ -243,7 +243,7 @@ def download_csv(n_clicks, figure):
         selected_commodity = gt.commodity
 
         # Assuming gt.df is a pandas DataFrame and filtering specific columns
-        df = gt.df[
+        df = pd.concat(gt.aggregated_df, ignore_index=True)[
             [
                 "ms",
                 "ms_name",
@@ -261,6 +261,9 @@ def download_csv(n_clicks, figure):
         ]
         df = df[df["top1_deposit_name"].isin(visible_traces)]
 
+        df["ms_name"] = df["ms_name"].apply(
+            lambda x: x[1:].replace(":", ",") if ":" in x else x
+        )
         # Check if the DataFrame has the necessary columns and data
         if not df.empty:
             return dcc.send_data_frame(

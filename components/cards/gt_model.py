@@ -59,11 +59,19 @@ def greedy_weighted_avg_aggregation(df, distances, proximity_threshold):
         else:
             combined_ms_name = ": ".join(df.iloc[group]["ms_name"])
 
+        # Retrieve consistent values for other columns
+        ms_value = df.iloc[group[0]]["ms"]
+        commodity_value = df.iloc[group[0]]["commodity"]
+        top1_deposit_name_value = df.iloc[group[0]]["top1_deposit_name"]
+
         aggregated_data.append(
             {
                 "total_grade": weighted_grade,
                 "total_tonnage": total_tonnage,
-                "ms_name": combined_ms_name,  # Add the combined ms_name
+                "ms_name": combined_ms_name,
+                "ms": ms_value,
+                "commodity": commodity_value,
+                "top1_deposit_name": top1_deposit_name_value,
             }
         )
 
@@ -97,6 +105,8 @@ def get_gt_model(gt, proxmity_value=0):
 
     gt_model = go.Figure()
 
+    gt.aggregated_df = []
+
     for d_type in unique_labels:
         df_filtered = gt.df[gt.df["top1_deposit_name"] == d_type]
 
@@ -105,6 +115,7 @@ def get_gt_model(gt, proxmity_value=0):
             aggregated_df = greedy_weighted_avg_aggregation(
                 df_filtered, gt.distance_caches, proxmity_value
             )
+        gt.aggregated_df.append(aggregated_df)
 
         hover_template = (
             "<b>MS Name:</b> %{text}<br>"

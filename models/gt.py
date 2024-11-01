@@ -59,6 +59,7 @@ class GradeTonnage:
         self.distance_caches = {}
         self.proximity_value = 0
         self.visible_traces = []
+        self.aggregated_df = []
 
     def init(self):
         """Initialize and load data from query path using the function reference"""
@@ -84,6 +85,7 @@ class GradeTonnage:
         """sets new commodity"""
         self.commodity = selected_commodity.lower()
         self.visible_traces = []
+        self.aggregated_df = []
 
     def update_proximity(self, proximity_value):
         """sets new proximity"""
