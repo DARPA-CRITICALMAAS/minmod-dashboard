@@ -48,7 +48,6 @@ header_layout = html.Div(
     },
 )
 
-
 footer_layout = html.Footer(
     [
         dbc.Container(
@@ -166,7 +165,6 @@ footer_layout = html.Footer(
     style={
         "position": "relative",
         "width": "100%",
-        "bottom": "0",
         "backgroundColor": "#212121",
     },
 )
@@ -195,9 +193,7 @@ app.layout = html.Div(
     style={"display": "flex", "flexDirection": "column", "minHeight": "100vh"},
     children=[
         header_layout,
-        html.Hr(
-            style={"margin": "0px"},
-        ),
+        html.Hr(style={"margin": "0px"}),
         dbc.Row(
             dbc.Nav(
                 [
@@ -253,17 +249,15 @@ app.layout = html.Div(
                 style={"margin-left": "10px"},
             )
         ),
-        html.Hr(
-            style={"margin": "0px"},
-        ),
+        html.Hr(style={"margin": "0px"}),
         html.Div(
             dash.page_container,
             style={
-                "flex": "1",
+                "flex": "1 0 auto",  # Ensure it takes the remaining space but can grow
                 "margin-bottom": "40px",
             },
         ),
-        footer_layout,
+        footer_layout,  # Keep footer at the bottom
     ],
 )
 

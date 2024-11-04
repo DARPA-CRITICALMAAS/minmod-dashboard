@@ -119,7 +119,8 @@ def set_default_commodity(options):
 
 @callback(
     Output("url-geo", "children"),
-    [Input("clickable-geo-plot", "clickData")],
+    Output("clickable-geo-plot", "clickData"),
+    Input("clickable-geo-plot", "clickData"),
     prevent_initial_call=True,
 )
 def open_url(clickData):
@@ -130,7 +131,7 @@ def open_url(clickData):
             (gm.gdf["lat"] == clicked_dict["lat"])
             & (gm.gdf["lon"] == clicked_dict["lon"])
         ]
-        return filtered_df["ms"].tolist()[0]
+        return filtered_df["ms"].tolist()[0], None
 
 
 @callback(

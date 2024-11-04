@@ -8,7 +8,77 @@ import numpy as np
 import plotly.graph_objects as go
 
 
-def get_gt_model(gt):
+def extract_lat_lng(wkt_point):
+    if pd.isnull(wkt_point):
+        return pd.Series([np.nan, np.nan])  # Return NaN if the value is null
+    # Remove 'POINT(' and ')' and split by space
+    wkt_point = wkt_point.replace("POINT (", "").replace(")", "")
+    lon, lat = map(float, wkt_point.split())
+    return pd.Series([lat, lon])
+
+
+# Function to calculate the min and max distances between points (cached)
+def calculate_min_max_distance(distances):
+    min_distance = min(distances.values())
+    max_distance = max(distances.values())
+    return min_distance, max_distance
+
+
+def greedy_weighted_avg_aggregation(df, distances, proximity_threshold):
+    # Create an empty list to store aggregated data
+    aggregated_data = []
+    processed_indices = set()
+
+    # Loop through all points
+    for i in range(len(df)):
+        if i in processed_indices:
+            continue  # Skip already processed points
+
+        # Start with the current point as the center
+        group = [i]
+        processed_indices.add(i)
+
+        # Find all nearby points within the proximity threshold
+        for j in range(len(df)):
+            if i != j and j not in processed_indices:
+                # Ensure that the distance is valid and is not None
+                distance = distances.get((i, j))
+                if distance is not None and distance < proximity_threshold:
+                    group.append(j)
+                    processed_indices.add(j)
+
+        # Calculate the weighted average of the grade using tonnage as weights
+        total_tonnage = df.iloc[group]["total_tonnage"].sum()
+        weighted_grade = np.average(
+            df.iloc[group]["total_grade"], weights=df.iloc[group]["total_tonnage"]
+        )
+
+        # Combine ms_name values from the group
+        if len(df.iloc[group]["ms_name"]) > 1:
+            combined_ms_name = ": " + ": ".join(df.iloc[group]["ms_name"])
+        else:
+            combined_ms_name = ": ".join(df.iloc[group]["ms_name"])
+
+        # Retrieve consistent values for other columns
+        ms_value = df.iloc[group[0]]["ms"]
+        commodity_value = df.iloc[group[0]]["commodity"]
+        top1_deposit_name_value = df.iloc[group[0]]["top1_deposit_name"]
+
+        aggregated_data.append(
+            {
+                "total_grade": weighted_grade,
+                "total_tonnage": total_tonnage,
+                "ms_name": combined_ms_name,
+                "ms": ms_value,
+                "commodity": commodity_value,
+                "top1_deposit_name": top1_deposit_name_value,
+            }
+        )
+
+    return pd.DataFrame(aggregated_data)
+
+
+def get_gt_model(gt, proxmity_value=0):
     """A function to generate grade-tonnage plot."""
 
     # unique_labels = sorted(gt.df["top1_deposit_name"].unique())
@@ -17,6 +87,7 @@ def get_gt_model(gt):
     gt.df["avg_metal_per_tonnage"] = (
         gt.df["total_contained_metal"] / gt.df["total_tonnage"]
     )
+
     grouped = (
         gt.df.groupby("top1_deposit_name")
         .agg({"top1_deposit_name": "count", "avg_metal_per_tonnage": "mean"})
@@ -34,8 +105,17 @@ def get_gt_model(gt):
 
     gt_model = go.Figure()
 
+    gt.aggregated_df = []
+
     for d_type in unique_labels:
         df_filtered = gt.df[gt.df["top1_deposit_name"] == d_type]
+
+        aggregated_df = df_filtered
+        if proxmity_value != 0:
+            aggregated_df = greedy_weighted_avg_aggregation(
+                df_filtered, gt.distance_caches, proxmity_value
+            )
+        gt.aggregated_df.append(aggregated_df)
 
         hover_template = (
             "<b>MS Name:</b> %{text}<br>"
@@ -49,16 +129,17 @@ def get_gt_model(gt):
 
         gt_model.add_trace(
             go.Scatter(
-                x=df_filtered["total_tonnage"],
-                y=df_filtered["total_grade"],
+                x=aggregated_df["total_tonnage"],
+                y=aggregated_df["total_grade"],
                 mode="markers",
-                text=df_filtered[
-                    "ms_name"
-                ],  # Use truncated names for the labels on the plot
+                text=aggregated_df["ms_name"].apply(
+                    lambda x: x.replace(":", "<br>")
+                ),  # Use truncated names for the labels on the plot
                 hovertemplate=hover_template,  # Use full names for the hover text
                 name=f"{d_type} ({deposit_count})",  # Add the count of deposits to the legend name
                 marker=dict(color=color_map[d_type], size=10, symbol="circle"),
                 textposition="top center",
+                visible=True,
             )
         )
 
@@ -109,17 +190,26 @@ def get_gt_model(gt):
         dragmode="pan",
     )
 
+    if len(gt.visible_traces) > 0:
+        for trace in gt_model["data"]:
+            if trace.hovertemplate:
+                trace_name = " ".join(trace["name"].split()[:-1])
+                if trace_name in gt.visible_traces:
+                    trace.visible = True
+                else:
+                    trace.visible = "legendonly"
+
     return gt_model
 
 
-def gt_model_card(gt):
+def gt_model_card(gt, proximity_value=0):
     """a function to generate grade-tonnage plot in a dbc.Card"""
     return dbc.Card(
         dbc.CardBody(
             [
                 dcc.Graph(
                     id="clickable-plot",
-                    figure=get_gt_model(gt),
+                    figure=get_gt_model(gt, proximity_value),
                     config={
                         "displayModeBar": True,
                         "displaylogo": False,
