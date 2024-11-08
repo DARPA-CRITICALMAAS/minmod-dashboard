@@ -55,9 +55,15 @@ def greedy_weighted_avg_aggregation(df, distances, proximity_threshold):
 
         # Combine ms_name values from the group
         if len(df.iloc[group]["ms_name"]) > 1:
-            combined_ms_name = ": " + ": ".join(df.iloc[group]["ms_name"])
+            combined_ms_name = ":: " + ":: ".join(df.iloc[group]["ms_name"])
         else:
-            combined_ms_name = ": ".join(df.iloc[group]["ms_name"])
+            combined_ms_name = ":: ".join(df.iloc[group]["ms_name"])
+
+        # Combine ms values from the group
+        if len(df.iloc[group]["ms"]) > 1:
+            combined_ms = ":: " + ":: ".join(df.iloc[group]["ms"])
+        else:
+            combined_ms = ":: ".join(df.iloc[group]["ms"])
 
         # Retrieve consistent values for other columns
         ms_value = df.iloc[group[0]]["ms"]
@@ -71,7 +77,7 @@ def greedy_weighted_avg_aggregation(df, distances, proximity_threshold):
                 "total_grade": weighted_grade,
                 "total_tonnage": total_tonnage,
                 "ms_name": combined_ms_name,
-                "ms": ms_value,
+                "ms": combined_ms,
                 "commodity": commodity_value,
                 "top1_deposit_name": top1_deposit_name_value,
                 "lat": lat,
@@ -137,7 +143,7 @@ def get_gt_model(gt, proxmity_value=0):
                 y=aggregated_df["total_grade"],
                 mode="markers",
                 text=aggregated_df["ms_name"].apply(
-                    lambda x: x.replace(":", "<br>")
+                    lambda x: x.replace("::", "<br>")
                 ),  # Use truncated names for the labels on the plot
                 hovertemplate=hover_template,  # Use full names for the hover text
                 name=f"{d_type} ({deposit_count})",  # Add the count of deposits to the legend name

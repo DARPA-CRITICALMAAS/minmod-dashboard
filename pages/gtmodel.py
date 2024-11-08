@@ -275,9 +275,12 @@ def download_csv(n_clicks, figure):
         df = df[df["top1_deposit_name"].isin(visible_traces)]
 
         df["ms_name"] = df["ms_name"].apply(
-            lambda x: x[1:].replace(":", ",") if ":" in x else x
+            lambda x: x[2:].replace("::", ",") if "::" in x else x
         )
-        df["ms"] = df["ms"].apply(lambda x: x[1:].replace(":", ",") if ":" in x else x)
+        print(df["ms"])
+        df["ms"] = df["ms"].apply(
+            lambda x: x[2:].replace("::", ",") if "::" in x else x
+        )
         # Check if the DataFrame has the necessary columns and data
 
         # Update Column Names
