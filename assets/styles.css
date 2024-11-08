@@ -15,3 +15,7 @@
     height: 35px;
     font-size: 25px;
 }
+
+#aggregation-slider .rc-slider-mark-text {
+    font-size: 15px;
+}

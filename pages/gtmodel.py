@@ -10,7 +10,8 @@ from models import GradeTonnage
 gt = GradeTonnage(commodity="aluminum")
 gt.init()
 
-min_distance, max_distance = 0, 200
+min_distance, max_distance = 0.1, 100
+marks = {0.1: "100m", 5: "5km", 20: "20km", 100: "100km"}
 
 dash.register_page(__name__)
 
@@ -77,15 +78,13 @@ layout = html.Div(
                                             id="aggregation-slider",
                                             min=int(min_distance),
                                             max=int(max_distance),
-                                            step=10,
-                                            value=int(
-                                                min_distance
-                                            ),  # Set default value to 0 (min_distance)
-                                            marks=None,
+                                            step=0.1,
+                                            value=0,  # Set default value to 0 (min_distance)
+                                            marks=marks,
                                             tooltip={
                                                 "placement": "bottom",
                                                 "always_visible": True,
-                                                "template": "{value} miles",
+                                                "template": "{value} kms",
                                             },
                                         ),
                                     ],
@@ -250,10 +249,23 @@ def download_csv(n_clicks, figure):
                 "ms_name",
                 "commodity",
                 "top1_deposit_name",
+                "lat",
+                "lng",
                 "total_tonnage",
                 "total_grade",
             ]
         ].copy()
+
+        column_names = [
+            "Mineral Site URL",
+            "Mineral Site Name",
+            "Commodity",
+            "Top 1 Deposit Name",
+            "Latitude",
+            "Longitude",
+            "Total Tonnage(Million tonnes)",
+            "Total Grade(Percent)",
+        ]
 
         visible_traces = [
             " ".join(trace["name"].split()[:-1])
@@ -265,7 +277,12 @@ def download_csv(n_clicks, figure):
         df["ms_name"] = df["ms_name"].apply(
             lambda x: x[1:].replace(":", ",") if ":" in x else x
         )
+        df["ms"] = df["ms"].apply(lambda x: x[1:].replace(":", ",") if ":" in x else x)
         # Check if the DataFrame has the necessary columns and data
+
+        # Update Column Names
+        df.columns = column_names
+
         if not df.empty:
             return dcc.send_data_frame(
                 df.to_csv, "gt_data.csv"

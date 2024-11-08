@@ -45,8 +45,8 @@ def lru_cache_with_date_range(maxsize=128):
     return decorator
 
 
-# Earth radius in miles
-EARTH_RADIUS = 3959.0  # in miles
+# Earth radius in kms
+EARTH_RADIUS = 6371.0  # in kms
 
 
 class GradeTonnage:
