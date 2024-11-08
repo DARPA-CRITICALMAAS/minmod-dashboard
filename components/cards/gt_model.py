@@ -63,6 +63,8 @@ def greedy_weighted_avg_aggregation(df, distances, proximity_threshold):
         ms_value = df.iloc[group[0]]["ms"]
         commodity_value = df.iloc[group[0]]["commodity"]
         top1_deposit_name_value = df.iloc[group[0]]["top1_deposit_name"]
+        lat = df.iloc[group[0]]["lat"]
+        lng = df.iloc[group[0]]["lng"]
 
         aggregated_data.append(
             {
@@ -72,6 +74,8 @@ def greedy_weighted_avg_aggregation(df, distances, proximity_threshold):
                 "ms": ms_value,
                 "commodity": commodity_value,
                 "top1_deposit_name": top1_deposit_name_value,
+                "lat": lat,
+                "lng": lng,
             }
         )
 
