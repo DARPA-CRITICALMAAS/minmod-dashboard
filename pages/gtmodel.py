@@ -66,7 +66,7 @@ layout = html.Div(
                                 html.Div(
                                     [
                                         html.P(
-                                            "Geo Spatial Aggregation (Miles)",  # Text above slider
+                                            "Geo Spatial Aggregation (Kilometers)",  # Text above slider
                                             style={
                                                 "font-family": '"Open Sans", verdana, arial, sans-serif',
                                                 "font-size": "20px",
