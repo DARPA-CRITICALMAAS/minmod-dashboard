@@ -88,10 +88,11 @@ def greedy_weighted_avg_aggregation(df, distances, proximity_threshold):
     return pd.DataFrame(aggregated_data)
 
 
-def get_gt_model(gt, proxmity_value=0):
+def get_gt_model(gt, proximity_value=0):
     """A function to generate grade-tonnage plot."""
 
-    # unique_labels = sorted(gt.df["top1_deposit_name"].unique())
+    if not gt:
+        return None
 
     # Sorting the deposit types based on group count, avg (total_contained_metal/total_tonnage)
     gt.df["avg_metal_per_tonnage"] = (
@@ -121,9 +122,9 @@ def get_gt_model(gt, proxmity_value=0):
         df_filtered = gt.df[gt.df["top1_deposit_name"] == d_type]
 
         aggregated_df = df_filtered
-        if proxmity_value != 0:
+        if proximity_value != 0:
             aggregated_df = greedy_weighted_avg_aggregation(
-                df_filtered, gt.distance_caches, proxmity_value
+                df_filtered, gt.distance_caches, proximity_value
             )
         gt.aggregated_df.append(aggregated_df)
 
@@ -209,32 +210,4 @@ def get_gt_model(gt, proxmity_value=0):
                 else:
                     trace.visible = "legendonly"
 
-    return gt_model
-
-
-def gt_model_card(gt, proximity_value=0):
-    """a function to generate grade-tonnage plot in a dbc.Card"""
-    return dbc.Card(
-        dbc.CardBody(
-            [
-                dcc.Graph(
-                    id="clickable-plot",
-                    figure=get_gt_model(gt, proximity_value),
-                    config={
-                        "displayModeBar": True,
-                        "displaylogo": False,
-                        "responsive": True,
-                        "showTips": True,
-                        "scrollZoom": True,
-                        "modeBarButtonsToRemove": [
-                            "autoScale2d",
-                            "lasso2d",
-                            "select2d",
-                            "zoomIn2d",
-                            "zoomOut2d",
-                        ],
-                    },
-                )
-            ]
-        )
-    )
+    return gt, gt_model
