@@ -261,6 +261,8 @@ app.layout = html.Div(
     ],
 )
 
+app.config.suppress_callback_exceptions = True
+
 # Run app and display result inline in the notebook
 if __name__ == "__main__":
     if sys.argv[1] == "dev":
