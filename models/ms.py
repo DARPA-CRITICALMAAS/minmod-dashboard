@@ -1,5 +1,6 @@
 import pandas as pd
 from helpers import dataservice_utils
+from helpers.exceptions import EmptyDedupDataFrame
 
 
 class MineralSite:
@@ -19,6 +20,9 @@ class MineralSite:
                 )
             )
         )
+        if self.df.empty:
+            raise EmptyDedupDataFrame("No Data Available")
+
         self.df = self.clean_df(self.df)
         self.deposit_types = self.df["Top 1 Deposit Type"].drop_duplicates().to_list()
         self.country = self.df["Country"].drop_duplicates().to_list()

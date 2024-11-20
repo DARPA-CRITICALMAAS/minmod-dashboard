@@ -88,7 +88,7 @@ def get_commodities():
     """a helper function to fetch commodities from SPARQL endpoint"""
     df = pd.DataFrame(dataservice_utils.fetch_api_data("/commodities", ssl_flag=False))
     df = filter_df_critical_minerals(df=df, key="name")
-    return df["name"].to_list()
+    return sorted(df["name"].to_list())
 
 
 if __name__ == "__main__":

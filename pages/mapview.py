@@ -132,6 +132,7 @@ def open_url(clickData):
             & (gm.gdf["lon"] == clicked_dict["lon"])
         ]
         return filtered_df["ms"].tolist()[0], None
+    return None, None
 
 
 @callback(

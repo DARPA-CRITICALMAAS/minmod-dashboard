@@ -3,7 +3,7 @@ from helpers import dataservice_utils
 from math import radians, sin, cos, sqrt, atan2
 from functools import lru_cache
 import numpy as np
-import time
+from helpers.exceptions import EmptyDedupDataFrame, EmtpyGTDataFrame
 from datetime import datetime, timedelta
 
 # Define a constant date range (e.g., 30 days)
@@ -70,6 +70,9 @@ class GradeTonnage:
                 )
             )
         )
+        if self.df.empty:
+            raise EmptyDedupDataFrame("No Data Available")
+
         self.df = self.clean_df(self.df)
         self.deposit_types = self.df["top1_deposit_name"].drop_duplicates().to_list()
         self.country = self.df["country"].to_list()
@@ -139,6 +142,9 @@ class GradeTonnage:
 
         # filtering Unkown deposit types
         df = df[df["top1_deposit_name"] != "Unknown"]
+
+        if df.empty:
+            raise EmtpyGTDataFrame("No Grade or Tonnage Data Available")
 
         return df
 

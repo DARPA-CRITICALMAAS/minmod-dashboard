@@ -7,6 +7,7 @@ from helpers import kpis
 from components import get_gt_model
 from models import GradeTonnage
 import json
+from helpers.exceptions import MinModException
 
 min_distance, max_distance = 0.1, 100
 marks = {0.1: "100m", 5: "5km", 20: "20km", 100: "100km"}
@@ -215,7 +216,27 @@ def update_output(selected_commodity, proximity_value, figure):
                 if "hovertemplate" in trace and trace.get("visible", True) == True
             ]
             gt.visible_traces = visible_traces
-    except:
+
+    except MinModException as e:
+        return (
+            None,
+            None,
+            [
+                dbc.Alert(
+                    str(e),
+                    color="danger",
+                ),
+                dcc.Graph(
+                    id="clickable-plot",
+                    figure={},
+                    style={
+                        "display": "none",
+                    },
+                ),
+            ],
+        )
+
+    except Exception as e:
         return (
             None,
             None,

@@ -10,6 +10,8 @@ from helpers import sparql_utils
 from dash_ag_grid import AgGrid
 from models import MineralSite
 from dash.exceptions import PreventUpdate
+from helpers.exceptions import MinModException
+import traceback
 
 
 dash.register_page(__name__)
@@ -138,7 +140,17 @@ def update_dashboard(
             country_options = [
                 {"label": country, "value": country} for country in ms.country
             ]
-        except:
+        except MinModException as e:
+            return (
+                deposit_options,
+                country_options,
+                dbc.Alert(
+                    str(e),
+                    color="danger",
+                ),
+            )
+
+        except Exception as e:
             return (
                 deposit_options,
                 country_options,
