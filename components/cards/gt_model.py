@@ -193,7 +193,7 @@ def get_gt_model(gt, proximity_value=0):
             title_font=dict(size=23, family="Arial Bold, sans-serif"),
             range=[np.log10(y_min / 5), np.log10(y_max * 5)],
         ),
-        title=f"Grade-Tonnage Model of Mineral Deposits ({gt.commodity})",
+        title=f"Grade-Tonnage Model of Mineral Deposits ({' & '.join([', '.join(gt.commodities[:-1]), gt.commodities[-1]]) if len(gt.commodities) > 1 else gt.commodities[0]})",
         hovermode="closest",
         autosize=True,
         height=750,

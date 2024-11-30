@@ -5,6 +5,8 @@ from functools import lru_cache
 import numpy as np
 from helpers.exceptions import EmptyDedupDataFrame, EmtpyGTDataFrame
 from datetime import datetime, timedelta
+import asyncio
+from helpers.kpis import get_commodity_dict
 
 # Define a constant date range (e.g., 30 days)
 CACHE_DURATION_DAYS = 3
@@ -52,8 +54,8 @@ EARTH_RADIUS = 6371.0  # in kms
 class GradeTonnage:
     """A class for holding the grade tonnage model plot"""
 
-    def __init__(self, commodity, proximity_value=0):
-        self.commodity = commodity.lower()
+    def __init__(self, commodities, proximity_value=0):
+        self.commodities = [commodity.lower() for commodity in commodities]
         self.deposit_types = []
         self.country = []
         self.distance_caches = {}
@@ -63,13 +65,39 @@ class GradeTonnage:
 
     def init(self):
         """Initialize and load data from query path using the function reference"""
-        self.df = pd.DataFrame(
-            self.clean_and_fix(
-                dataservice_utils.fetch_api_data(
-                    "/dedup_mineral_sites/" + self.commodity, ssl_flag=False
+        # self.df = pd.DataFrame(
+        #     self.clean_and_fix(
+        #         dataservice_utils.fetch_api_data(
+        #             "/dedup_mineral_sites/" + self.commodity, ssl_flag=False
+        #         )
+        #     )
+        # )
+
+        dataframes = [
+            pd.DataFrame(data)
+            for data in self.clean_and_fix(
+                asyncio.run(
+                    dataservice_utils.fetch_all(
+                        [
+                            "/dedup_mineral_sites/" + commodity
+                            for commodity in self.commodities
+                        ]
+                    )
                 )
             )
+        ]
+
+        for i, df in enumerate(dataframes):
+            if df.empty:
+                raise EmptyDedupDataFrame(
+                    f"No Data Available for : {self.commodities(i)}"
+                )
+
+        self.df = pd.concat(
+            dataframes,
+            ignore_index=True,
         )
+
         if self.df.empty:
             raise EmptyDedupDataFrame("No Data Available")
 
@@ -84,9 +112,11 @@ class GradeTonnage:
         if self.proximity_value != 0:
             self.distance_caches = self.compute_all_distances(self.commodity)
 
-    def update_commodity(self, selected_commodity):
+    def update_commodity(self, selected_commodities):
         """sets new commodity"""
-        self.commodity = selected_commodity.lower()
+        self.commodities = [
+            selected_commodity.lower() for selected_commodity in selected_commodities
+        ]
         self.visible_traces = []
         self.aggregated_df = []
 
@@ -94,54 +124,67 @@ class GradeTonnage:
         """sets new proximity"""
         self.proximity_value = proximity_value
 
-    def clean_and_fix(self, raw_data):
-        results = []
-        for data in raw_data:
-            first_site = data["sites"][0]
-            if len(data["deposit_types"]) == 0:
-                continue
-            highest_confidence_deposit = max(
-                data["deposit_types"], key=lambda x: x["confidence"]
-            )
+    def clean_and_fix(self, raw_data_list):
+        result_list = []
+        for raw_data in raw_data_list:
+            results = []
+            for data in raw_data:
+                first_site = data["sites"][0]
+                if len(data["deposit_types"]) == 0:
+                    continue
+                highest_confidence_deposit = max(
+                    data["deposit_types"], key=lambda x: x["confidence"]
+                )
 
-            # Combine the first site and highest confidence deposit into a single dictionary
-            combined_data = {
-                **first_site,
-                **{
-                    "top1_deposit_" + k: v
-                    for k, v in highest_confidence_deposit.items()
-                },
-            }
+                # Combine the first site and highest confidence deposit into a single dictionary
+                combined_data = {
+                    **first_site,
+                    **{
+                        "top1_deposit_" + k: v
+                        for k, v in highest_confidence_deposit.items()
+                    },
+                }
 
-            # Add additional fields from the main data structure
-            for field in [
-                "commodity",
-                "loc_crs",
-                "loc_wkt",
-                "best_loc_crs",
-                "best_loc_centroid_epsg_4326",
-                "best_loc_wkt",
-                "total_tonnage",
-                "total_grade",
-                "total_contained_metal",
-            ]:
-                combined_data[field] = data[field]
+                # Add additional fields from the main data structure
+                for field in [
+                    "commodity",
+                    "loc_crs",
+                    "loc_wkt",
+                    "best_loc_crs",
+                    "best_loc_centroid_epsg_4326",
+                    "best_loc_wkt",
+                    "total_tonnage",
+                    "total_grade",
+                    "total_contained_metal",
+                ]:
+                    combined_data[field] = data[field]
 
-            # Setting Unkown Deposit Types
-            if not combined_data.get("total_tonnage") or not combined_data.get(
-                "total_grade"
-            ):
-                combined_data["top1_deposit_name"] = "Unknown"
+                # Setting Unkown Deposit Types
+                if not combined_data.get("total_tonnage") or not combined_data.get(
+                    "total_grade"
+                ):
+                    combined_data["top1_deposit_name"] = "Unknown"
 
-            results.append(combined_data)
-        return results
+                results.append(combined_data)
+            result_list.append(results)
+        return result_list
 
     def clean_df(self, df):
         """A cleaner method to clean the raw data obtained from the SPARQL endpoint"""
         df = df[df["ms_name"].notna()]
 
+        commodities = df["commodity"].unique()
+
         # filtering Unkown deposit types
         df = df[df["top1_deposit_name"] != "Unknown"]
+
+        filtered_commodities = df["commodity"].unique()
+
+        for commodity in commodities:
+            if commodity not in filtered_commodities:
+                raise EmtpyGTDataFrame(
+                    f"No Grade or Tonnage Data Avalable for : {get_commodity_dict()[commodity].capitalize()}"
+                )
 
         if df.empty:
             raise EmtpyGTDataFrame("No Grade or Tonnage Data Available")

@@ -91,5 +91,14 @@ def get_commodities():
     return sorted(df["name"].to_list())
 
 
+def get_commodity_dict():
+    df = pd.DataFrame(dataservice_utils.fetch_api_data("/commodities", ssl_flag=False))
+    df = filter_df_critical_minerals(df=df, key="name")
+    commodity_dict = (
+        df.set_index(df["uri"].str.split("/").str[-1])["name"].str.lower().to_dict()
+    )
+    return commodity_dict
+
+
 if __name__ == "__main__":
     print(get_mineral_inventories_count_by_commodity())

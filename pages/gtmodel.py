@@ -34,10 +34,11 @@ layout = html.Div(
                                         {"label": commodity, "value": commodity}
                                         for commodity in kpis.get_commodities()
                                     ],
+                                    multi=True,
                                     placeholder="Search Commodity",
                                 ),
                             ),
-                            width=2,
+                            width=3,
                         ),
                         style={
                             "margin-top": "15px",
@@ -202,9 +203,21 @@ def update_output(selected_commodity, proximity_value, figure):
     """A callback to render grade tonnage model based on the commodity selected and proximity value"""
 
     if not selected_commodity:
-        raise dash.exceptions.PreventUpdate
+        return (
+            None,
+            None,
+            [
+                dcc.Graph(
+                    id="clickable-plot",
+                    figure={},
+                    style={
+                        "display": "none",
+                    },
+                ),
+            ],
+        )
 
-    selected_commodity = selected_commodity.split()[0]
+    selected_commodity = selected_commodity
 
     try:
         gt = GradeTonnage(selected_commodity, proximity_value)
