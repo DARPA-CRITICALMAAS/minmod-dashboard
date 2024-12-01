@@ -110,7 +110,7 @@ class GradeTonnage:
             lambda x: pd.Series(self.extract_lat_lng(x))
         )
         if self.proximity_value != 0:
-            self.distance_caches = self.compute_all_distances(self.commodity)
+            self.distance_caches = self.compute_all_distances(tuple(self.commodities))
 
     def update_commodity(self, selected_commodities):
         """sets new commodity"""
@@ -204,7 +204,7 @@ class GradeTonnage:
 
     # Caching approach: Precompute all pairwise distances and store them
     @lru_cache_with_date_range(maxsize=10)
-    def compute_all_distances(self, commodity):
+    def compute_all_distances(self, commodities):
         distances = {}
         num_points = len(self.df)
 
