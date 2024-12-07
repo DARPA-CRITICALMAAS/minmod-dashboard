@@ -8,11 +8,8 @@
       "name": "Python: Dash App (Dev Mode)",
       "type": "debugpy",
       "request": "launch",
-      "module": "poetry",
+      "program": "${workspaceFolder}/app.py",
       "args": [
-        "run",
-        "python",
-        "app.py",
         "dev"
       ],
     },
