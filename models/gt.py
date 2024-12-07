@@ -180,14 +180,14 @@ class GradeTonnage:
 
         filtered_commodities = df["commodity"].unique()
 
+        if df.empty:
+            raise EmtpyGTDataFrame("No Grade or Tonnage Data Available")
+
         for commodity in commodities:
             if commodity not in filtered_commodities:
                 raise EmtpyGTDataFrame(
                     f"No Grade or Tonnage Data Avalable for : {get_commodity_dict()[commodity].capitalize()}"
                 )
-
-        if df.empty:
-            raise EmtpyGTDataFrame("No Grade or Tonnage Data Available")
 
         return df
 

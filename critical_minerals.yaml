@@ -49,10 +49,29 @@ REE:
   - lutetium
   - neodymium
   - praseodymium
-  - promethium
   - samarium
   - scandium
   - terbium
   - thulium
   - ytterbium
   - yttrium
+  - promethium
+
+HEAVY_REE:
+  - dysprosium
+  - yttrium
+  - terbium
+  - holmium
+  - erbium
+  - thulium
+  - ytterbium
+  - yttrium
+  - lutetium
+
+LIGHT_REE:
+  - lanthanum
+  - cerium
+  - praseodymium
+  - neodymium
+  - samarium
+  - europium
