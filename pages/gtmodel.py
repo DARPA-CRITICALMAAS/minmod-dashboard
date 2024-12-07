@@ -141,6 +141,7 @@ layout = html.Div(
         ),
         dcc.Store(id="gt-agg-data"),
         dcc.Store(id="gt-df-data"),
+        dcc.Store(id="select-commodity-data"),
         html.Div(id="url", style={"display": "none"}),
         html.Div(id="url-div", style={"display": "none"}),  # Dummy div
     ],
@@ -169,10 +170,14 @@ def update_commodity_dropdown(pathname):
     Output(
         "aggregation-slider", "value"
     ),  # Reset slider value to 0 on commodity change
-    Input("commodity-gt", "value"),
+    [Input("aggregation-slider", "value"), Input("commodity-gt", "value")],
+    State("select-commodity-data", "commodity_data"),
 )
-def reset_slider_on_commodity_change(selected_commodity):
-    return 0  # Reset slider to 0 whenever a new commodity is selected
+def reset_slider_on_commodity_change(value, selected_commodity, commodity_data):
+    if selected_commodity != commodity_data:
+        return 0  # Reset slider to 0 whenever a new commodity is selected
+    else:
+        return value
 
 
 @callback(
@@ -189,6 +194,7 @@ def toggle_slider_and_download(figure):
     [
         Output("gt-agg-data", "agg_data"),
         Output("gt-df-data", "df_data"),
+        Output("select-commodity-data", "commodity_data"),
         Output("render-plot", "children"),
         Output("commodity-gt", "value"),
     ],
@@ -204,6 +210,7 @@ def update_output(selected_commodities, proximity_value, figure):
 
     if not selected_commodities:
         return (
+            None,
             None,
             None,
             [
@@ -222,12 +229,12 @@ def update_output(selected_commodities, proximity_value, figure):
         selected_commodities.remove("REE")
         selected_commodities = list(set(selected_commodities + ree_minerals))
 
-    if "HEAVY_REE" in selected_commodities:
-        selected_commodities.remove("HEAVY_REE")
+    if "HEAVY-REE" in selected_commodities:
+        selected_commodities.remove("HEAVY-REE")
         selected_commodities = list(set(selected_commodities + heavy_ree_minerals))
 
-    if "LIGHT_REE" in selected_commodities:
-        selected_commodities.remove("LIGHT_REE")
+    if "LIGHT-REE" in selected_commodities:
+        selected_commodities.remove("LIGHT-REE")
         selected_commodities = list(set(selected_commodities + light_ree_minerals))
 
     try:
@@ -243,6 +250,7 @@ def update_output(selected_commodities, proximity_value, figure):
 
     except MinModException as e:
         return (
+            None,
             None,
             None,
             [
@@ -263,6 +271,7 @@ def update_output(selected_commodities, proximity_value, figure):
 
     except Exception as e:
         return (
+            None,
             None,
             None,
             [
@@ -287,6 +296,7 @@ def update_output(selected_commodities, proximity_value, figure):
             [df.to_json(date_format="iso", orient="split") for df in gt.aggregated_df]
         ),
         gt.df.to_json(date_format="iso", orient="split"),
+        selected_commodities,
         [
             dbc.Card(
                 dbc.CardBody(

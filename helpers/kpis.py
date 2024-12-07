@@ -91,7 +91,7 @@ def get_commodities():
             "/commodities", params={"is_critical": "true"}, ssl_flag=False
         )
     )
-    return sorted(df["name"].to_list() + ["REE", "HEAVY_REE", "LIGHT_REE"])
+    return sorted(df["name"].to_list() + ["REE", "HEAVY-REE", "LIGHT-REE"])
 
 
 def get_commodity_dict():
