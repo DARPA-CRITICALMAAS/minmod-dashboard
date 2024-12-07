@@ -8,9 +8,13 @@
       "name": "Python: Dash App (Dev Mode)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/app.py",
-      "console": "integratedTerminal",
-      "args": ["dev"]
+      "module": "poetry",
+      "args": [
+        "run",
+        "python",
+        "app.py",
+        "dev"
+      ],
     },
     {
       "name": "Python: Test",
