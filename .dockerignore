@@ -11,6 +11,7 @@ __pycache__/
 # Ignore local environment files
 .env
 .env.local
+.env.template
 
 # Ignore test data
 .pytest_cache/

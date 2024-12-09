@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minmod_dev
+    ports:
+      - "8050:8050"
+    env_file: 
+      - .env.dev
+    command: ["poetry", "run", "python", "app.py", "dev"]
+
+  prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minmod_prod
+    ports:
+      - "8050:8050"
+    env_file: 
+      - .env.prod
+    command: ["poetry", "run", "python", "app.py", "prod"]
