@@ -8,7 +8,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 
-def extract_lat_lng(wkt_point):
+def extract_lat_lon(wkt_point):
     if pd.isnull(wkt_point):
         return pd.Series([np.nan, np.nan])  # Return NaN if the value is null
     # Remove 'POINT(' and ')' and split by space
@@ -70,7 +70,7 @@ def greedy_weighted_avg_aggregation(df, distances, proximity_threshold):
         commodity_value = df.iloc[group[0]]["commodity"]
         top1_deposit_name_value = df.iloc[group[0]]["top1_deposit_name"]
         lat = df.iloc[group[0]]["lat"]
-        lng = df.iloc[group[0]]["lng"]
+        lon = df.iloc[group[0]]["lon"]
 
         aggregated_data.append(
             {
@@ -81,7 +81,7 @@ def greedy_weighted_avg_aggregation(df, distances, proximity_threshold):
                 "commodity": commodity_value,
                 "top1_deposit_name": top1_deposit_name_value,
                 "lat": lat,
-                "lng": lng,
+                "lon": lon,
             }
         )
 

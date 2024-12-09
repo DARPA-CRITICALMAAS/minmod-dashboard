@@ -14,7 +14,8 @@ RUN apt-get update && \
     # Make poetry available in the PATH
     ln -s /root/.local/bin/poetry /usr/local/bin/poetry && \
     # Install project dependencies
-    poetry config virtualenvs.create false && \
+    poetry config virtualenvs.create true && \
+    poetry config virtualenvs.in-project true && \
     poetry install --no-root && \
     # Cleanup to reduce image size
     apt-get remove -y curl && \
@@ -28,10 +29,9 @@ COPY . .
 # Make port 8050 available to the world outside this container
 EXPOSE 8050
 
-# Define environment variable
-ENV NAME World
-
 # Run app.py when the container launches
-CMD ["poetry", "run", "python", "app.py", "prod"]
-# Or use Gunicorn for production
+# dev
+# CMD ["poetry", "run", "python", "app.py", "dev"]
+
+# prod
 # CMD ["poetry", "run", "gunicorn", "index:server", "--workers", "3", "-b", "0.0.0.0:8050"]

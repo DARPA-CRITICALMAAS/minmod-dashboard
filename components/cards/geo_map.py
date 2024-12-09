@@ -1,7 +1,6 @@
 import dash
 from dash import dcc, html
 import plotly.express as px
-import pandas as pd
 import geopandas as gpd
 from shapely.wkt import loads
 import dash_bootstrap_components as dbc
@@ -19,30 +18,12 @@ def safe_wkt_load(wkt_str):
 
 def get_geo_model(gm, theme):
     """a function to get a scatter mapbox plot"""
-    # Cleaning wkt points
-    gm.df["geometry"] = gm.df["best_loc_centroid_epsg_4326"].apply(safe_wkt_load)
-    gdf = gpd.GeoDataFrame(gm.df, geometry="geometry", crs="epsg:4326")
-    gdf = gdf.dropna(subset=["geometry"])
-
-    # Ensure all geometries are Points (if not, convert them to Points using centroid)
-    gdf["geometry"] = gdf["geometry"].apply(
-        lambda geom: geom if geom.geom_type == "Point" else geom.centroid
-    )
-
-    # removing any rows where the geometry conversion has failed (i.e., NaN in 'lon' or 'lat')
-    gdf = gdf[~gdf["geometry"].isna()]
-
-    # Extracting longitude and latitude
-    gdf["lon"] = gdf["geometry"].x
-    gdf["lat"] = gdf["geometry"].y
 
     # check if invalid invalid_geo_df = gdf[~gdf["lat"].between(-90, 90) | ~gdf["lon"].between(-180, 180)]
-    gdf = gdf[(gdf["lat"].between(-90, 90)) & (gdf["lon"].between(-180, 180))]
-
-    gm.set_gdf(gdf)
+    gm.df = gm.df[(gm.df["lat"].between(-90, 90)) & (gm.df["lon"].between(-180, 180))]
 
     geo_model = px.scatter_mapbox(
-        gdf,
+        gm.df,
         lat="lat",
         lon="lon",
         hover_name="ms_name",
@@ -62,7 +43,7 @@ def get_geo_model(gm, theme):
     )
 
     # Set the hovertext to be the "ms_name"
-    geo_model.update_traces(hovertext=gdf["ms_name"])
+    geo_model.update_traces(hovertext=gm.df["ms_name"])
 
     # Setting Map Style and toggle based on theme
     if theme == "light":

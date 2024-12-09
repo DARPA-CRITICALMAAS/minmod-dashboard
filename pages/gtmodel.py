@@ -392,7 +392,7 @@ def download_csv(n_clicks, agg_data, figure):
                 "commodity",
                 "top1_deposit_name",
                 "lat",
-                "lng",
+                "lon",
                 "total_tonnage",
                 "total_grade",
             ]

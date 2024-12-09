@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  minmod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minmod
+    ports:
+      - "8050:8050"
+    environment: 
+      - API_ENDPOINT=${API_ENDPOINT}
+      - SPARQL_ENDPOINT=${SPARQL_ENDPOINT}
+    command: ["poetry", "run", "python", "app.py"]

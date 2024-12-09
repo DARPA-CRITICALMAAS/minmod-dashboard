@@ -58,18 +58,18 @@ def log_async_runtime(func):
 
 # Async function to fetch JSON data with timing
 @log_async_runtime
-async def fetch_json(session, url):
-    async with session.get(url) as response:
+async def fetch_json(session, url, params=None):
+    async with session.get(url, params=params) as response:
         response.raise_for_status()
         return await response.json()
 
 
 # Async function to fetch data from all URLs
-async def fetch_all(urls):
-    urls = [API_ENDPOINT + url_path for url_path in urls]
+async def fetch_all(requests):
+    requests = [(API_ENDPOINT + url, params) for url, params in requests]
     connector = aiohttp.TCPConnector(ssl=False)  # Disable SSL verification
     async with aiohttp.ClientSession(connector=connector) as session:
-        tasks = [fetch_json(session, url) for url in urls]
+        tasks = [fetch_json(session, url, params) for url, params in requests]
         return await asyncio.gather(*tasks)
 
 
