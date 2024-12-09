@@ -5,9 +5,6 @@ from flask import Flask
 from constants import SPARQL_ENDPOINT
 import sys
 
-CERT_FILE = "./ssl/minmod_isi_edu_cert.cer"
-KEY_FILE = "./ssl/minmod_isi_edu_key.key"
-
 FA = "https://use.fontawesome.com/releases/v5.8.1/css/all.css"
 
 server = Flask(__name__)  # define flask app.server
@@ -265,8 +262,5 @@ app.config.suppress_callback_exceptions = True
 
 # Run app and display result inline in the notebook
 if __name__ == "__main__":
-    if sys.argv[1] == "dev":
-        app.run_server(host="0.0.0.0", port=8050)
-    if sys.argv[1] == "prod":
-        context = (CERT_FILE, KEY_FILE)
-        app.run_server(host="0.0.0.0", ssl_context=context, port=8050)
+    app.run_server(host="0.0.0.0", port=8050)
+    
