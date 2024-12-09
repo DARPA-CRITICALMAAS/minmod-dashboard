@@ -8,6 +8,7 @@ from components import get_gt_model
 from models import GradeTonnage
 import json
 from helpers.exceptions import MinModException
+from constants import ree_minerals, heavy_ree_minerals, light_ree_minerals
 
 min_distance, max_distance = 0.1, 100
 marks = {0.1: "100m", 5: "5km", 20: "20km", 100: "100km"}
@@ -27,17 +28,16 @@ layout = html.Div(
                 [
                     dbc.Row(
                         dbc.Col(
-                            dbc.Spinner(
-                                dcc.Dropdown(
-                                    id="commodity-gt",
-                                    options=[
-                                        {"label": commodity, "value": commodity}
-                                        for commodity in kpis.get_commodities()
-                                    ],
-                                    placeholder="Search Commodity",
-                                ),
+                            dcc.Dropdown(
+                                id="commodity-gt",
+                                options=[
+                                    {"label": commodity, "value": commodity}
+                                    for commodity in kpis.get_commodities()
+                                ],
+                                multi=True,
+                                placeholder="Search Commodity",
                             ),
-                            width=2,
+                            width=3,
                         ),
                         style={
                             "margin-top": "15px",
@@ -141,6 +141,7 @@ layout = html.Div(
         ),
         dcc.Store(id="gt-agg-data"),
         dcc.Store(id="gt-df-data"),
+        dcc.Store(id="select-commodity-data"),
         html.Div(id="url", style={"display": "none"}),
         html.Div(id="url-div", style={"display": "none"}),  # Dummy div
     ],
@@ -169,10 +170,14 @@ def update_commodity_dropdown(pathname):
     Output(
         "aggregation-slider", "value"
     ),  # Reset slider value to 0 on commodity change
-    Input("commodity-gt", "value"),
+    [Input("aggregation-slider", "value"), Input("commodity-gt", "value")],
+    State("select-commodity-data", "commodity_data"),
 )
-def reset_slider_on_commodity_change(selected_commodity):
-    return 0  # Reset slider to 0 whenever a new commodity is selected
+def reset_slider_on_commodity_change(value, selected_commodity, commodity_data):
+    if selected_commodity != commodity_data:
+        return 0  # Reset slider to 0 whenever a new commodity is selected
+    else:
+        return value
 
 
 @callback(
@@ -189,7 +194,9 @@ def toggle_slider_and_download(figure):
     [
         Output("gt-agg-data", "agg_data"),
         Output("gt-df-data", "df_data"),
+        Output("select-commodity-data", "commodity_data"),
         Output("render-plot", "children"),
+        Output("commodity-gt", "value"),
     ],
     [
         Input("commodity-gt", "value"),
@@ -198,16 +205,40 @@ def toggle_slider_and_download(figure):
     ],
     prevent_initial_call=True,
 )
-def update_output(selected_commodity, proximity_value, figure):
+def update_output(selected_commodities, proximity_value, figure):
     """A callback to render grade tonnage model based on the commodity selected and proximity value"""
 
-    if not selected_commodity:
-        raise dash.exceptions.PreventUpdate
+    if not selected_commodities:
+        return (
+            None,
+            None,
+            None,
+            [
+                dcc.Graph(
+                    id="clickable-plot",
+                    figure={},
+                    style={
+                        "display": "none",
+                    },
+                ),
+            ],
+            [],
+        )
 
-    selected_commodity = selected_commodity.split()[0]
+    if "REE" in selected_commodities:
+        selected_commodities.remove("REE")
+        selected_commodities = list(set(selected_commodities + ree_minerals))
+
+    if "HEAVY-REE" in selected_commodities:
+        selected_commodities.remove("HEAVY-REE")
+        selected_commodities = list(set(selected_commodities + heavy_ree_minerals))
+
+    if "LIGHT-REE" in selected_commodities:
+        selected_commodities.remove("LIGHT-REE")
+        selected_commodities = list(set(selected_commodities + light_ree_minerals))
 
     try:
-        gt = GradeTonnage(selected_commodity, proximity_value)
+        gt = GradeTonnage(selected_commodities, proximity_value)
         gt.init()
         if proximity_value != 0:
             visible_traces = [
@@ -219,6 +250,7 @@ def update_output(selected_commodity, proximity_value, figure):
 
     except MinModException as e:
         return (
+            None,
             None,
             None,
             [
@@ -234,10 +266,12 @@ def update_output(selected_commodity, proximity_value, figure):
                     },
                 ),
             ],
+            selected_commodities,
         )
 
     except Exception as e:
         return (
+            None,
             None,
             None,
             [
@@ -253,6 +287,7 @@ def update_output(selected_commodity, proximity_value, figure):
                     },
                 ),
             ],
+            selected_commodities,
         )
 
     gt, gt_model_plot = get_gt_model(gt, proximity_value)
@@ -261,6 +296,7 @@ def update_output(selected_commodity, proximity_value, figure):
             [df.to_json(date_format="iso", orient="split") for df in gt.aggregated_df]
         ),
         gt.df.to_json(date_format="iso", orient="split"),
+        selected_commodities,
         [
             dbc.Card(
                 dbc.CardBody(
@@ -287,6 +323,7 @@ def update_output(selected_commodity, proximity_value, figure):
                 )
             )
         ],
+        selected_commodities,
     )
 
 

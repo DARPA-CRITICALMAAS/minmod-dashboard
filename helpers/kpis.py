@@ -86,9 +86,24 @@ def get_mineral_site_count():
 
 def get_commodities():
     """a helper function to fetch commodities from SPARQL endpoint"""
-    df = pd.DataFrame(dataservice_utils.fetch_api_data("/commodities", ssl_flag=False))
-    df = filter_df_critical_minerals(df=df, key="name")
-    return sorted(df["name"].to_list())
+    df = pd.DataFrame(
+        dataservice_utils.fetch_api_data(
+            "/commodities", params={"is_critical": "true"}, ssl_flag=False
+        )
+    )
+    return sorted(df["name"].to_list() + ["REE", "HEAVY-REE", "LIGHT-REE"])
+
+
+def get_commodity_dict():
+    df = pd.DataFrame(
+        dataservice_utils.fetch_api_data(
+            "/commodities", params={"is_critical": "true"}, ssl_flag=False
+        )
+    )
+    commodity_dict = (
+        df.set_index(df["uri"].str.split("/").str[-1])["name"].str.lower().to_dict()
+    )
+    return commodity_dict
 
 
 if __name__ == "__main__":
