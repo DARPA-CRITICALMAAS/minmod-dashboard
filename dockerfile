@@ -29,7 +29,7 @@ COPY . .
 EXPOSE 8050
 
 # Define environment variable
-ENV NAME World
+ENV API_ENDPOINT=https://minmod.isi.edu/api/v1
 
 # Run app.py when the container launches
 CMD ["poetry", "run", "python", "app.py", "prod"]
