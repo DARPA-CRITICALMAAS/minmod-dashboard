@@ -7,6 +7,7 @@ from helpers.exceptions import EmptyDedupDataFrame, EmtpyGTDataFrame
 from datetime import datetime, timedelta
 import asyncio
 from helpers.kpis import get_commodity_dict
+from constants import API_ENDPOINT
 
 # Define a constant date range (e.g., 30 days)
 CACHE_DURATION_DAYS = 3
@@ -62,6 +63,12 @@ class GradeTonnage:
         self.proximity_value = proximity_value
         self.visible_traces = []
         self.aggregated_df = []
+        self.data_cache = {
+            "countries": {},
+            "deposit-types": {},
+            "states-or-provinces": {},
+            "commodities": {},
+        }
 
     def init(self):
         """Initialize and load data from query path using the function reference"""
@@ -73,13 +80,15 @@ class GradeTonnage:
         #     )
         # )
 
+        self.load_data_cache()
+
         dataframes = [
             pd.DataFrame(data)
             for data in self.clean_and_fix(
                 asyncio.run(
                     dataservice_utils.fetch_all(
                         [
-                            "/dedup_mineral_sites/" + commodity
+                            ("/dedup-mineral-sites", {"commodity": commodity})
                             for commodity in self.commodities
                         ]
                     )
@@ -105,12 +114,20 @@ class GradeTonnage:
         self.deposit_types = self.df["top1_deposit_name"].drop_duplicates().to_list()
         self.country = self.df["country"].to_list()
 
-        # Apply the function to the 'best_loc_wkt' column and assign the results to 'lat' and 'lng' columns in the same DataFrame
-        self.df[["lat", "lng"]] = self.df["best_loc_centroid_epsg_4326"].apply(
-            lambda x: pd.Series(self.extract_lat_lng(x))
-        )
         if self.proximity_value != 0:
             self.distance_caches = self.compute_all_distances(tuple(self.commodities))
+
+    def load_data_cache(self):
+        data_list = sorted(self.data_cache.keys())
+
+        data_results = asyncio.run(
+            dataservice_utils.fetch_all([("/" + url, None) for url in data_list])
+        )
+
+        for i in range(len(data_list)):
+            for data in data_results[i]:
+                q_key = data["uri"].split("/")[-1]
+                self.data_cache[data_list[i]][q_key] = data
 
     def update_commodity(self, selected_commodities):
         """sets new commodity"""
@@ -129,35 +146,83 @@ class GradeTonnage:
         for raw_data in raw_data_list:
             results = []
             for data in raw_data:
-                first_site = data["sites"][0]
+
                 if len(data["deposit_types"]) == 0:
                     continue
+
+                combined_data = {}
+                combined_data["ms"] = "/".join(
+                    [API_ENDPOINT.split("/api")[0], "resource", data["id"]]
+                )
+                combined_data["ms_name"] = data["name"]
+                combined_data["ms_type"] = data["type"]
+                combined_data["ms_rank"] = data["rank"]
+
+                # Location details
+                if (
+                    "location" in data
+                    and "country" in data["location"]
+                    and data["location"]["country"]
+                    and data["location"]["country"][0] in self.data_cache["countries"]
+                ):
+                    combined_data["country"] = self.data_cache["countries"][
+                        data["location"]["country"][0]
+                    ]["name"]
+                else:
+                    combined_data["country"] = None
+
+                if (
+                    "location" in data
+                    and "state_or_province" in data["location"]
+                    and data["location"]["state_or_province"]
+                    and data["location"]["state_or_province"][0]
+                    in self.data_cache["states-or-provinces"]
+                ):
+                    combined_data["state_or_province"] = self.data_cache[
+                        "states-or-provinces"
+                    ][data["location"]["state_or_province"][0]]["name"]
+                else:
+                    combined_data["state_or_province"] = None
+
+                if "location" in data:
+                    combined_data["lat"] = data["location"].get("lat", None)
+                    combined_data["lon"] = data["location"].get("lon", None)
+
+                # Deposit Type details
                 highest_confidence_deposit = max(
                     data["deposit_types"], key=lambda x: x["confidence"]
                 )
 
-                # Combine the first site and highest confidence deposit into a single dictionary
-                combined_data = {
-                    **first_site,
-                    **{
-                        "top1_deposit_" + k: v
-                        for k, v in highest_confidence_deposit.items()
-                    },
-                }
+                deposit_details = self.data_cache["deposit-types"].get(
+                    highest_confidence_deposit["id"], None
+                )
 
-                # Add additional fields from the main data structure
-                for field in [
-                    "commodity",
-                    "loc_crs",
-                    "loc_wkt",
-                    "best_loc_crs",
-                    "best_loc_centroid_epsg_4326",
-                    "best_loc_wkt",
-                    "total_tonnage",
-                    "total_grade",
-                    "total_contained_metal",
-                ]:
-                    combined_data[field] = data[field]
+                if not deposit_details:
+                    continue
+                combined_data["top1_deposit_name"] = deposit_details["name"]
+                combined_data["top1_deposit_group"] = deposit_details["group"]
+                combined_data["top1_deposit_environment"] = deposit_details[
+                    "environment"
+                ]
+                combined_data["top1_deposit_confidence"] = highest_confidence_deposit[
+                    "confidence"
+                ]
+                combined_data["top1_deposit_source"] = highest_confidence_deposit[
+                    "source"
+                ]
+
+                # Commodity details
+                combined_data["commodity"] = data["grade_tonnage"]["commodity"]
+
+                # GT details
+                if "total_grade" in data["grade_tonnage"]:
+                    combined_data["total_grade"] = data["grade_tonnage"]["total_grade"]
+                    combined_data["total_tonnage"] = data["grade_tonnage"][
+                        "total_tonnage"
+                    ]
+                    combined_data["total_contained_metal"] = data["grade_tonnage"][
+                        "total_contained_metal"
+                    ]
 
                 # Setting Unkown Deposit Types
                 if not combined_data.get("total_tonnage") or not combined_data.get(
@@ -213,16 +278,16 @@ class GradeTonnage:
             for j in range(i + 1, num_points):
                 distance = self.haversine(
                     self.df.iloc[i]["lat"],
-                    self.df.iloc[i]["lng"],
+                    self.df.iloc[i]["lon"],
                     self.df.iloc[j]["lat"],
-                    self.df.iloc[j]["lng"],
+                    self.df.iloc[j]["lon"],
                 )
                 distances[(i, j)] = distance
                 distances[(j, i)] = distance  # Symmetric distances
 
         return distances
 
-    def extract_lat_lng(self, wkt_point):
+    def extract_lat_lon(self, wkt_point):
         if pd.isnull(wkt_point):
             return pd.Series([np.nan, np.nan])  # Return NaN if the value is null
         # Remove 'POINT(' and ')' and split by space
