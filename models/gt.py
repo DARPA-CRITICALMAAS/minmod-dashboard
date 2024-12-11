@@ -251,7 +251,7 @@ class GradeTonnage:
         for commodity in commodities:
             if commodity not in filtered_commodities:
                 raise EmtpyGTDataFrame(
-                    f"No Grade or Tonnage Data Avalable for : {get_commodity_dict()[commodity].capitalize()}"
+                    f"No Grade or Tonnage Data Avalable for : {self.data_cache['commodities'][commodity]['name'].capitalize()}"
                 )
 
         return df

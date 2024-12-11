@@ -7,6 +7,7 @@ with open("critical_minerals.yaml", "r") as file:
 
 minerals = set(mineral.lower() for mineral in config["CRITICAL_MINERALS"])
 ree_minerals = list(set(mineral.lower().capitalize() for mineral in config["REE"]))
+pge_minerals = list(set(mineral.lower().capitalize() for mineral in config["PGE"]))
 heavy_ree_minerals = list(
     set(mineral.lower().capitalize() for mineral in config["HEAVY_REE"])
 )

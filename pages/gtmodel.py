@@ -8,7 +8,7 @@ from components import get_gt_model
 from models import GradeTonnage
 import json
 from helpers.exceptions import MinModException
-from constants import ree_minerals, heavy_ree_minerals, light_ree_minerals
+from constants import ree_minerals, heavy_ree_minerals, light_ree_minerals, pge_minerals
 
 min_distance, max_distance = 0.1, 100
 marks = {0.1: "100m", 5: "5km", 20: "20km", 100: "100km"}
@@ -236,6 +236,10 @@ def update_output(selected_commodities, proximity_value, figure):
     if "LIGHT-REE" in selected_commodities:
         selected_commodities.remove("LIGHT-REE")
         selected_commodities = list(set(selected_commodities + light_ree_minerals))
+    
+    if "PGE" in selected_commodities:
+        selected_commodities.remove("PGE")
+        selected_commodities = list(set(selected_commodities + pge_minerals))
 
     try:
         gt = GradeTonnage(selected_commodities, proximity_value)

@@ -49,6 +49,7 @@ REE:
   - lutetium
   - neodymium
   - praseodymium
+  - promethium
   - samarium
   - scandium
   - terbium
@@ -74,3 +75,10 @@ LIGHT_REE:
   - neodymium
   - samarium
   - europium
+
+PGE:
+  - palladium
+  - rhodium
+  - ruthenium
+  - iridium
+  - osmium
