@@ -256,7 +256,7 @@ def update_output(selected_commodities, proximity_value, figure):
         return (
             None,
             None,
-            None,
+            selected_commodities,
             [
                 dbc.Alert(
                     str(e),
@@ -277,7 +277,7 @@ def update_output(selected_commodities, proximity_value, figure):
         return (
             None,
             None,
-            None,
+            selected_commodities,
             [
                 dbc.Alert(
                     "No results found or there was an error with the query.",
