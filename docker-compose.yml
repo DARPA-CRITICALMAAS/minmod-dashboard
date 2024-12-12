@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   dashboard:
+    image: dashboard
     build:
       context: .
       dockerfile: Dockerfile
