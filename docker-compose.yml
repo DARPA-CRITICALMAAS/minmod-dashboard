@@ -1,4 +1,4 @@
-version: "3.8"
+name: minmod
 
 services:
   dashboard:
@@ -13,3 +13,8 @@ services:
       - API_ENDPOINT=${API_ENDPOINT}
       - SPARQL_ENDPOINT=${SPARQL_ENDPOINT}
     command: ["poetry", "run", "python", "app.py"]
+
+networks:
+  minmod:
+    name: minmod
+    external: true
