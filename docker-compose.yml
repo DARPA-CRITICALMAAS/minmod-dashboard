@@ -1,11 +1,11 @@
 version: "3.8"
 
 services:
-  minmod:
+  dashboard:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: minmod
+    container_name: minmod-dashboard
     ports:
       - "8050:8050"
     environment: 
