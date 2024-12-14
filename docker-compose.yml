@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: toan2/minmod-dashboard  # Add a custom tag
     container_name: minmod
     ports:
       - "8050:8050"
@@ -12,3 +13,4 @@ services:
       - API_ENDPOINT=${API_ENDPOINT}
       - SPARQL_ENDPOINT=${SPARQL_ENDPOINT}
     command: ["poetry", "run", "python", "app.py"]
+
