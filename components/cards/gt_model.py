@@ -130,6 +130,7 @@ def get_gt_model(gt, proximity_value=0):
 
         hover_template = (
             "<b>MS Name:</b> %{text}<br>"
+            + "<b>Commodity:</b> %{customdata[0]}<br>"
             + "<b>Grade:</b> %{y}<br>"
             + "<b>Tonnage:</b> %{x}<br>"
             + "<extra></extra>"
@@ -147,6 +148,9 @@ def get_gt_model(gt, proximity_value=0):
                     lambda x: x.replace("::", "<br>")
                 ),  # Use truncated names for the labels on the plot
                 hovertemplate=hover_template,  # Use full names for the hover text
+                customdata=pd.DataFrame({"commodity":aggregated_df["commodity"].apply(
+    lambda x: gt.data_cache["commodities"][x]["name"]
+)}),
                 name=f"{d_type} ({deposit_count})",  # Add the count of deposits to the legend name
                 marker=dict(color=color_map[d_type], size=10, symbol="circle"),
                 textposition="top center",
