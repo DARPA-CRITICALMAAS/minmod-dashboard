@@ -406,7 +406,7 @@ def download_csv(n_clicks, agg_data, figure):
             "Mineral Site URL",
             "Mineral Site Name",
             "Commodity",
-            "Top 1 Deposit Name",
+            "Deposit Name",
             "Latitude",
             "Longitude",
             "Total Tonnage(Million tonnes)",
