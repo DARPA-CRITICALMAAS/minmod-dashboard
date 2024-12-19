@@ -121,16 +121,16 @@ class MineralSite:
             combined_data["top1_deposit_source"] = highest_confidence_deposit["source"]
 
             # Commodity details
-            combined_data["commodity"] = data["grade_tonnage"]["commodity"]
+            combined_data["commodity"] = data["grade_tonnage"][0]["commodity"]
 
             # GT details
-            if "total_grade" in data["grade_tonnage"]:
-                combined_data["total_grade"] = data["grade_tonnage"]["total_grade"]
-                combined_data["total_tonnage"] = data["grade_tonnage"]["total_tonnage"]
-                combined_data["total_contained_metal"] = data["grade_tonnage"][
+            if "total_grade" in data["grade_tonnage"][0]:
+                combined_data["total_grade"] = data["grade_tonnage"][0]["total_grade"]
+                combined_data["total_tonnage"] = data["grade_tonnage"][0]["total_tonnage"]
+                combined_data["total_contained_metal"] = data["grade_tonnage"][0][
                     "total_contained_metal"
                 ]
-
+            
             # Setting Unkown Deposit Types
             if not combined_data.get("total_tonnage") or not combined_data.get(
                 "total_grade"

@@ -235,6 +235,15 @@ app.layout = html.Div(
                     ),
                     dbc.NavItem(
                         dbc.NavLink(
+                            "Minmod Editor",
+                            external_link=True,
+                            active=True,
+                            href="editor",
+                            style={"font-size": "19px", "white-space": "nowrap"},
+                        )
+                    ),
+                    dbc.NavItem(
+                        dbc.NavLink(
                             "Advanced Search",
                             external_link=True,
                             active=True,
