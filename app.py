@@ -10,6 +10,7 @@ FA = "https://use.fontawesome.com/releases/v5.8.1/css/all.css"
 server = Flask(__name__)  # define flask app.server
 
 app = dash.Dash(
+    url_base_pathname="/dashboard/",
     external_stylesheets=[dbc.themes.LITERA, FA], use_pages=True, server=server
 )
 
