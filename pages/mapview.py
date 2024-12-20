@@ -12,7 +12,7 @@ import time
 from dash import callback_context
 from dash.exceptions import PreventUpdate
 
-dash.register_page(__name__)
+dash.register_page(__name__, path="/dashboard/mapview")
 
 gm = GeoMineral(commodity="nickel")
 gm.init()

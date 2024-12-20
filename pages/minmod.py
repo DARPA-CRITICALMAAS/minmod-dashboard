@@ -12,7 +12,7 @@ import time
 from dash import callback_context
 from dash.exceptions import PreventUpdate
 
-dash.register_page(__name__, path="/")
+dash.register_page(__name__, path="/dashboard/")
 
 mineral_inventories = kpis.get_mineral_inventories_count_by_commodity()
 

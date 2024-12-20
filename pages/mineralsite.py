@@ -14,7 +14,7 @@ from helpers.exceptions import MinModException
 import traceback
 
 
-dash.register_page(__name__)
+dash.register_page(__name__, path="/dashboard/mineralsite")
 
 layout = html.Div(
     [

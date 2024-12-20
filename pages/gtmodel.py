@@ -13,7 +13,7 @@ from constants import ree_minerals, heavy_ree_minerals, light_ree_minerals, pge_
 min_distance, max_distance = 0.1, 100
 marks = {0.1: "100m", 5: "5km", 20: "20km", 100: "100km"}
 
-dash.register_page(__name__)
+dash.register_page(__name__, path="/dashboard/gtmodel")
 
 layout = html.Div(
     style={
