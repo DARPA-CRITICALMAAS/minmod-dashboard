@@ -1,4 +1,6 @@
-# MinMod Dashboard
+# TA2 MinMod Dashboard
+
+**Note:** This repo will soon be merged with [TA2 MinMod Editor](https://github.com/DARPA-CRITICALMAAS/ta2-minmod-editor) to be a single HMI tool for TA2 MinMod.
 
 <div align="center">
 
