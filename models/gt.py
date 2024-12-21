@@ -152,7 +152,7 @@ class GradeTonnage:
 
                 combined_data = {}
                 combined_data["ms"] = "/".join(
-                    [API_ENDPOINT.split("/api")[0], "resource", data["id"]]
+                    [API_ENDPOINT.split("/api")[0], "derived", data["id"]]
                 )
                 combined_data["ms_name"] = data["name"]
                 combined_data["ms_type"] = data["type"]
@@ -212,15 +212,13 @@ class GradeTonnage:
                 ]
 
                 # Commodity details
-                combined_data["commodity"] = data["grade_tonnage"]["commodity"]
+                combined_data["commodity"] = data["grade_tonnage"][0]["commodity"]
 
                 # GT details
-                if "total_grade" in data["grade_tonnage"]:
-                    combined_data["total_grade"] = data["grade_tonnage"]["total_grade"]
-                    combined_data["total_tonnage"] = data["grade_tonnage"][
-                        "total_tonnage"
-                    ]
-                    combined_data["total_contained_metal"] = data["grade_tonnage"][
+                if "total_grade" in data["grade_tonnage"][0]:
+                    combined_data["total_grade"] = data["grade_tonnage"][0]["total_grade"]
+                    combined_data["total_tonnage"] = data["grade_tonnage"][0]["total_tonnage"]
+                    combined_data["total_contained_metal"] = data["grade_tonnage"][0][
                         "total_contained_metal"
                     ]
 
@@ -251,7 +249,7 @@ class GradeTonnage:
         for commodity in commodities:
             if commodity not in filtered_commodities:
                 raise EmtpyGTDataFrame(
-                    f"No Grade or Tonnage Data Avalable for : {get_commodity_dict()[commodity].capitalize()}"
+                    f"No Grade or Tonnage Data Avalable for : {self.data_cache['commodities'][commodity]['name'].capitalize()}"
                 )
 
         return df

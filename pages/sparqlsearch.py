@@ -30,7 +30,7 @@ editor_options = {
 
 examples = yaml.safe_load(open("./examples/sparql.example.yaml"))["sample_queries"]
 
-dash.register_page(__name__)
+dash.register_page(__name__, path="/sparqlsearch")
 
 layout = html.Div(
     [

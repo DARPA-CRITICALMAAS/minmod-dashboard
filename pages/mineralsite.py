@@ -14,7 +14,7 @@ from helpers.exceptions import MinModException
 import traceback
 
 
-dash.register_page(__name__)
+dash.register_page(__name__, path="/mineralsite")
 
 layout = html.Div(
     [
@@ -171,7 +171,7 @@ def update_dashboard(
             df = ms.df
 
             if selected_deposit_types:
-                df = df[df["Top 1 Deposit Type"].isin(selected_deposit_types)]
+                df = df[df["Deposit Type"].isin(selected_deposit_types)]
                 # Refilter countries based on deposit type
                 filtered_countries = df["Country"].unique()
                 country_options = [
@@ -184,7 +184,7 @@ def update_dashboard(
             if selected_countries:
                 df = df[df["Country"].isin(selected_countries)]
 
-        except:
+        except Exception as e:
             return (
                 current_deposit_options,
                 current_country_options,

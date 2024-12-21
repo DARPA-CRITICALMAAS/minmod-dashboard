@@ -19,45 +19,37 @@
 
 ## Introduction
 
-```
-To Do.
+The MinMod Dashboard is a web app for analyzing and visualizing mineral site data. It features tools to view site statistics, map distributions, explore grade tonnage models, and download data. Users can review mineral data in tables or perform advanced searches with SPARQL queries. This platform simplifies decision-making and resource management with an all-in-one solution.
 
-```
 
 <!-- For more documentation, please see [not available yet](). -->
 
 ## Installation
 
-Install from pip: `pip install -r requirements.txt`
+```bash
+pip install poetry
+poetry install
+```
 
 ## Usage
 
-Install [docker](https://docs.docker.com/engine/installation/) and run:
+Install [docker](https://docs.docker.com/engine/installation/) and build the image:
 
-```shell
-docker build -t dash-app .
-docker run -v /var/local/mindmod/ssl/:/usr/src/app/ssl/ -d -p 8050:8050 dash-app
+```bash
+docker compose build
 ```
+
+The container of the dashboard will be created and run from the ta2-minmod-kg docker compose.
 
 Otherwise, for the standalone web service:
 
-```shell
-pip install -r requirements.txt
+```bash
+source activate .venv/bin/activate
 python app.py
 ```
 
-Visit [http://localhost:8050](http://localhost:5000)
+Visit [http://localhost:8050](http://localhost:8050)
 
-## Development
-
-Create a new branch off the **develop** branch for features or fixes.
-
-After making changes rebuild images and run the app:
-
-```shell
-docker build -t dash-app .
-docker run -p 8050:8050 dash-app
-```
 
 ## Tests
 

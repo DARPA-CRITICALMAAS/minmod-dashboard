@@ -31,7 +31,7 @@ EXPOSE 8050
 
 # Run app.py when the container launches
 # dev
-# CMD ["poetry", "run", "python", "app.py", "dev"]
+CMD ["poetry", "run", "python", "app.py"]
 
 # prod
 # CMD ["poetry", "run", "gunicorn", "index:server", "--workers", "3", "-b", "0.0.0.0:8050"]

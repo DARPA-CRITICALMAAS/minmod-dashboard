@@ -9,9 +9,6 @@
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/app.py",
-      "args": [
-        "dev"
-      ],
     },
     {
       "name": "Python: Test",

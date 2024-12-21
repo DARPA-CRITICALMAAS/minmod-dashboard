@@ -8,12 +8,12 @@ from components import get_gt_model
 from models import GradeTonnage
 import json
 from helpers.exceptions import MinModException
-from constants import ree_minerals, heavy_ree_minerals, light_ree_minerals
+from constants import ree_minerals, heavy_ree_minerals, light_ree_minerals, pge_minerals
 
 min_distance, max_distance = 0.1, 100
 marks = {0.1: "100m", 5: "5km", 20: "20km", 100: "100km"}
 
-dash.register_page(__name__)
+dash.register_page(__name__, path="/gtmodel")
 
 layout = html.Div(
     style={
@@ -236,6 +236,10 @@ def update_output(selected_commodities, proximity_value, figure):
     if "LIGHT-REE" in selected_commodities:
         selected_commodities.remove("LIGHT-REE")
         selected_commodities = list(set(selected_commodities + light_ree_minerals))
+    
+    if "PGE" in selected_commodities:
+        selected_commodities.remove("PGE")
+        selected_commodities = list(set(selected_commodities + pge_minerals))
 
     try:
         gt = GradeTonnage(selected_commodities, proximity_value)
@@ -252,7 +256,7 @@ def update_output(selected_commodities, proximity_value, figure):
         return (
             None,
             None,
-            None,
+            selected_commodities,
             [
                 dbc.Alert(
                     str(e),
@@ -273,7 +277,7 @@ def update_output(selected_commodities, proximity_value, figure):
         return (
             None,
             None,
-            None,
+            selected_commodities,
             [
                 dbc.Alert(
                     "No results found or there was an error with the query.",
@@ -402,7 +406,7 @@ def download_csv(n_clicks, agg_data, figure):
             "Mineral Site URL",
             "Mineral Site Name",
             "Commodity",
-            "Top 1 Deposit Name",
+            "Deposit Name",
             "Latitude",
             "Longitude",
             "Total Tonnage(Million tonnes)",

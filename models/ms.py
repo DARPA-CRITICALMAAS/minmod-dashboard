@@ -37,7 +37,7 @@ class MineralSite:
             raise EmptyDedupDataFrame("No Data Available")
 
         self.df = self.clean_df(self.df)
-        self.deposit_types = self.df["Top 1 Deposit Type"].drop_duplicates().to_list()
+        self.deposit_types = self.df["Deposit Type"].drop_duplicates().to_list()
         self.country = self.df["Country"].drop_duplicates().to_list()
 
     def load_data_cache(self):
@@ -65,7 +65,7 @@ class MineralSite:
 
             combined_data = {}
             combined_data["ms"] = "/".join(
-                [API_ENDPOINT.split("/api")[0], "resource", data["id"]]
+                [API_ENDPOINT.split("/api")[0], "derived", data["id"]]
             )
             combined_data["ms_name"] = data["name"]
             combined_data["ms_type"] = data["type"]
@@ -121,16 +121,16 @@ class MineralSite:
             combined_data["top1_deposit_source"] = highest_confidence_deposit["source"]
 
             # Commodity details
-            combined_data["commodity"] = data["grade_tonnage"]["commodity"]
+            combined_data["commodity"] = data["grade_tonnage"][0]["commodity"]
 
             # GT details
-            if "total_grade" in data["grade_tonnage"]:
-                combined_data["total_grade"] = data["grade_tonnage"]["total_grade"]
-                combined_data["total_tonnage"] = data["grade_tonnage"]["total_tonnage"]
-                combined_data["total_contained_metal"] = data["grade_tonnage"][
+            if "total_grade" in data["grade_tonnage"][0]:
+                combined_data["total_grade"] = data["grade_tonnage"][0]["total_grade"]
+                combined_data["total_tonnage"] = data["grade_tonnage"][0]["total_tonnage"]
+                combined_data["total_contained_metal"] = data["grade_tonnage"][0][
                     "total_contained_metal"
                 ]
-
+            
             # Setting Unkown Deposit Types
             if not combined_data.get("total_tonnage") or not combined_data.get(
                 "total_grade"
@@ -144,8 +144,10 @@ class MineralSite:
         """A cleaner method to clean the raw data obtained from the SPARQL endpoint"""
         drop_columns = [
             "commodity",
-            "total_contained_metal",
         ]
+        if "total_contained_metal" in df.columns:
+            drop_columns.append("total_contained_metal")
+
         df_selected = df.drop(drop_columns, axis=1)
 
         # rename columns
@@ -160,28 +162,19 @@ class MineralSite:
             "lon": "Longitude",
             "total_tonnage": "Total Tonnage",
             "total_grade": "Total Grade",
-            "top1_deposit_name": "Top 1 Deposit Type",
-            "top1_deposit_group": "Top Deposit Group",
-            "top1_deposit_environment": "Top 1 Deposit Environment",
-            "top1_deposit_confidence": "Top 1 Deposit Classification Confidence",
-            "top1_deposit_source": "Top 1 Deposit Classification Confidence",
+            "top1_deposit_name": "Deposit Type",
+            "top1_deposit_group": "Deposit Group",
+            "top1_deposit_environment": "Deposit Environment",
+            "top1_deposit_confidence": "Deposit Classification Confidence",
+            "top1_deposit_source": "Deposit Classification Source",
         }
 
         df_selected = df_selected.rename(columns=col_names)
-
-        # clean column ms name
-        def clean_names(ms_name):
-            if isinstance(ms_name, list):
-                return ms_name[0]
-            return ms_name
-
-        df_selected["Mineral Site Name"] = df_selected["Mineral Site Name"].apply(
-            clean_names
-        )
 
         df_selected["Mineral Site Name"] = df_selected.apply(
             lambda row: f"[{row['Mineral Site Name']}]({row['Mineral Site URI']})",
             axis=1,
         )
         df_selected = df_selected.drop(["Mineral Site URI"], axis=1)
+
         return df_selected

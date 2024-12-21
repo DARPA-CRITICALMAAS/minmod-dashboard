@@ -66,9 +66,15 @@ async def fetch_json(session, url, params=None):
 
 # Async function to fetch data from all URLs
 async def fetch_all(requests):
+    timeout = aiohttp.ClientTimeout(
+        total=30 * 60,     # Total timeout set to 30 minutes (in seconds)
+        connect=5 * 60,    # Max time to connect to the server (5 minutes)
+        sock_read=15 * 60, # Max time to read data from the server (15 minutes)
+        sock_connect=5 * 60 # Max time to connect the socket (5 minutes)
+    )
     requests = [(API_ENDPOINT + url, params) for url, params in requests]
     connector = aiohttp.TCPConnector(ssl=False)  # Disable SSL verification
-    async with aiohttp.ClientSession(connector=connector) as session:
+    async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
         tasks = [fetch_json(session, url, params) for url, params in requests]
         return await asyncio.gather(*tasks)
 
