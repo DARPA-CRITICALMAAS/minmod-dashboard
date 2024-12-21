@@ -49,10 +49,3 @@ python app.py
 ```
 
 Visit [http://localhost:8050](http://localhost:8050)
-
-
-## Tests
-
-```
-To Do.
-```
